@@ -336,7 +336,7 @@ const faqs = [
         try {
           var p = new URLSearchParams(location.search);
           p.set('lp', '3d');
-          if (!p.has('vv')) p.set('vv', '3d');
+          // vv is the AD VIDEO variant and stays whatever the ad put on the URL; this page is the lp, not a video.
           var qs = p.toString();
           var links = document.querySelectorAll('a[data-cta]');
           for (var i = 0; i < links.length; i++) links[i].href = 'https://spamclaims.com/lp/stop?' + qs;
