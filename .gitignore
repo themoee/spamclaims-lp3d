@@ -8,3 +8,9 @@ npm-debug.log*
 .idea/
 .vscode/
 tools/preview.png
+
+# Blender working files: render outputs and review stills stay local; public/seq holds the shipped frames
+blender/frames/
+blender/renders/
+blender/__pycache__/
+*.blend1
