@@ -27,7 +27,7 @@ const freePoints = [
 const faqs = [
   {
     q: 'Do I need to go to court?',
-    a: 'Most TCPA claims are resolved without you ever stepping into a courtroom. If a case proceeds, the attorney handles it.',
+    a: 'Many TCPA claims are resolved without the consumer ever going to court. If a case proceeds, the attorney handles it.',
   },
   {
     q: 'What kinds of texts may qualify?',
@@ -142,7 +142,7 @@ const beatJson = JSON.stringify(BEATS.map((b) => ({ id: b.id, in: b.in, out: b.o
       <section class="section" id="how">
         <div class="container">
           <p class="eyebrow">How it works</p>
-          <h2 class="h2">Four steps. You only do the first one.</h2>
+          <h2 class="h2">Four steps. The first takes a couple of minutes.</h2>
           <ol class="steps">
             {steps.map((s, i) => (
               <li class="step">
@@ -459,7 +459,7 @@ const beatJson = JSON.stringify(BEATS.map((b) => ({ id: b.id, in: b.in, out: b.o
       }
       .beats { position: absolute; inset: 0; pointer-events: none; }
       .beat {
-        position: absolute; left: var(--pad-x); top: calc(var(--header-h) + (100% - var(--header-h)) * 0.5); width: min(560px, 42vw);
+        position: absolute; left: var(--pad-x); top: calc(var(--header-h) + (100% - var(--header-h)) * 0.5); width: min(700px, 47vw);
         transform: translate3d(0, calc(-50% + var(--dy, 0px)), 0); opacity: 0; visibility: hidden;
         will-change: opacity, transform;
       }
