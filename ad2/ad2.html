@@ -1,0 +1,342 @@
+<!doctype html>
+<!-- Ad 2 ("Did you mean START?") compositor, 1080x1920: the sunset world, the Blender phone (RGBA frames), the
+     stickers, the plot twist, the money card with coins, and the cream end card. capture2.cjs calls renderFrame(i).
+     Open with ?play=1 to watch it. Everything is a pure function of time (frames render in any order). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SpamClaims Reel 2</title>
+    <style>
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; src: url(../public/fonts/inter-latin-opsz-normal.woff2) format('woff2'); }
+      :root { --navy: #17223d; --orange: #ff7a1a; --orange-2: #f25c05; --green: #34c759; --yellow: #ffe14a; --gray: #8e8e93; }
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #ff8a3d; }
+      body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; font-optical-sizing: auto; color: var(--navy); }
+      .layer { position: absolute; inset: 0; }
+      #grad { position: absolute; inset: 0; }
+      #glow { position: absolute; inset: 0; background: radial-gradient(58% 36% at 50% 56%, rgb(255 246 232 / 0.5), rgb(255 246 232 / 0) 72%); }
+      #burst { position: absolute; left: 50%; top: 56%; width: 2800px; height: 2800px; margin: -1400px 0 0 -1400px; border-radius: 50%; opacity: 0;
+        background: repeating-conic-gradient(from 0deg, rgb(255 255 255 / 0.30) 0deg 6deg, rgb(255 255 255 / 0) 6deg 15deg);
+        -webkit-mask-image: radial-gradient(circle, #000 14%, transparent 60%); mask-image: radial-gradient(circle, #000 14%, transparent 60%); }
+      #bubbles .b { position: absolute; background: rgb(255 255 255 / 0.16); border-radius: 46px; }
+      #bubbles .b::after { content: ''; position: absolute; bottom: -10px; width: 34px; height: 30px; background: inherit; border-radius: 0 0 18px 0; }
+      #bubbles .b.l::after { left: 10px; transform: skewX(18deg); border-radius: 0 0 0 18px; }
+      #bubbles .b.r::after { right: 10px; transform: skewX(-18deg); }
+      /* 2 AM: the sunset drops to night for one beat (with crickets in the mix) */
+      #night { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, #161d4d 0%, #232a66 50%, #3a2c66 100%); }
+      #night .star { position: absolute; border-radius: 50%; background: #fff; }
+      #moon { position: absolute; left: 912px; top: 452px; width: 92px; height: 92px; border-radius: 50%; box-shadow: 24px -10px 0 0 #fff1c2;
+        filter: drop-shadow(0 0 18px rgb(255 241 194 / 0.55)); }
+      #cream { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, #fff7ec 0%, #ffeedb 55%, #ffe3c4 100%); }
+      #phone { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+
+      /* stickers: the beat labels, in the band above the phone (inside Instagram's top safe line) */
+      .sticker { position: absolute; left: 50%; top: 322px; white-space: nowrap; font-weight: 820; letter-spacing: -0.025em; opacity: 0;
+        display: inline-flex; align-items: center; gap: 18px; will-change: transform; }
+      .sticker.me, .sticker.them { font-size: 60px; padding: 18px 40px 20px 30px; border-radius: 999px; box-shadow: 0 16px 40px rgb(120 40 0 / 0.28); }
+      .sticker.me { background: #fff; color: var(--navy); }
+      .sticker.them { background: var(--navy); color: #fff; }
+      .sticker .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; }
+      .sticker.me .dot { background: var(--green); }
+      .sticker.them .dot { background: #c7c7cc; }
+      .sticker.pov { display: block; background: #fff; font-size: 52px; line-height: 1.12; white-space: normal; width: max-content; text-align: center; justify-content: center;
+        padding: 24px 36px 26px; border-radius: 36px; box-shadow: 0 18px 46px rgb(120 40 0 / 0.3); }
+      .sticker.pov b { color: var(--orange-2); font-weight: 880; }
+      .sticker.twist { background: var(--yellow); font-size: 136px; font-weight: 900; letter-spacing: -0.04em; padding: 16px 48px 22px; border-radius: 28px;
+        border: 7px solid var(--navy); box-shadow: 12px 14px 0 var(--navy); top: 330px; }
+
+      /* the money card */
+      #money { position: absolute; left: 56px; right: 56px; top: 236px; background: #fff; border-radius: 44px; padding: 34px 36px 28px; text-align: center; overflow: hidden;
+        box-shadow: 0 26px 70px rgb(120 40 0 / 0.32); opacity: 0; will-change: transform; }
+      #money .l { display: block; font-size: 62px; font-weight: 830; letter-spacing: -0.035em; line-height: 1.08; opacity: 0; }
+      #money .l .hl { color: var(--orange-2); }
+      #money .hero { display: flex; align-items: baseline; justify-content: center; gap: 18px; margin-top: 6px; opacity: 0; transform-origin: 50% 70%; }
+      #money .hero .small { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; }
+      #money .hero .big { font-size: 196px; font-weight: 900; letter-spacing: -0.06em; line-height: 0.88; color: var(--orange); text-shadow: 0 10px 30px rgb(255 122 26 / 0.35); }
+      #money .hero sup { font-size: 80px; font-weight: 900; color: var(--orange); align-self: flex-start; margin-left: -12px; }
+
+      /* coins */
+      .coin { position: absolute; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; display: grid; place-items: center;
+        font-size: 58px; font-weight: 900; color: #9a5b00;
+        background: radial-gradient(circle at 34% 28%, #fff7c2 0%, #ffd84a 38%, #f2a917 74%, #c97f05 100%);
+        box-shadow: inset 0 -7px 0 rgb(140 80 0 / 0.35), inset 0 4px 0 rgb(255 255 255 / 0.5), 0 10px 22px rgb(120 60 0 / 0.35); }
+
+      /* the end card */
+      #end { position: absolute; inset: 0; opacity: 0; }
+      #end .logo { position: absolute; left: 50%; top: 236px; width: 540px; transform: translateX(-50%); }
+      #end .h { position: absolute; left: 0; right: 0; top: 432px; text-align: center; }
+      #end .h > span { display: block; font-size: 92px; font-weight: 860; letter-spacing: -0.045em; line-height: 1.0; opacity: 0; }
+      #end .h .hl { color: var(--orange-2); }
+      #end .sub { position: absolute; left: 0; right: 0; top: 640px; text-align: center; font-size: 40px; font-weight: 640; color: #4a5470; opacity: 0; }
+      #end .url { position: absolute; left: 50%; top: 706px; transform: translateX(-50%); padding: 18px 44px 20px; border-radius: 999px; opacity: 0;
+        font-size: 46px; font-weight: 780; color: #fff; letter-spacing: -0.01em;
+        background: linear-gradient(180deg, #ff9a45, var(--orange-2)); box-shadow: 0 18px 44px rgb(242 92 5 / 0.38), inset 0 2px 0 rgb(255 255 255 / 0.3); }
+      #end .fine { position: absolute; left: 96px; right: 96px; top: 1578px; text-align: center; font-size: 26px; line-height: 1.38; font-weight: 520; color: #6b7389; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div class="layer" id="bg"><div id="grad"></div><div id="glow"></div><div id="burst"></div><div class="layer" id="bubbles"></div><div id="night"><div id="moon"></div></div><div id="cream"></div></div>
+    <img id="phone" alt="" />
+    <div class="layer" id="stickers"></div>
+    <div id="money">
+      <span class="l">Every text after your</span>
+      <span class="l">first <span class="hl">STOP</span> could be worth</span>
+      <div class="hero"><span class="small">up to</span><span class="big">$500</span><sup>*</sup></div>
+    </div>
+    <div class="layer" id="coins"></div>
+    <div id="end">
+      <img class="logo" src="../public/logo.png" alt="SpamClaims.com" />
+      <div class="h"><span>Your spam could</span><span>finally <span class="hl">pay off.</span></span></div>
+      <div class="sub">See if yours qualify · Free · No sign-up</div>
+      <div class="url">spamclaims.com</div>
+      <div class="fine" id="fine"></div>
+    </div>
+    <script>
+      const q = new URLSearchParams(location.search);
+      const FRAMES = q.get('frames') || '../blender/frames/ad2';
+      let E = null, LAY = null;
+      const $ = (s) => document.querySelector(s);
+      const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+      const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+      const win = (t, a, b) => smooth((t - a) / (b - a));
+      const backOut = (x, c1 = 1.9) => { const s = clamp(x) - 1; return 1 + (c1 + 1) * s * s * s + c1 * s * s; };
+      const mix = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
+      const rgb = (c) => `rgb(${c[0]} ${c[1]} ${c[2]})`;
+      // deterministic pseudo-random
+      const rnd = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+      // palettes: calm sunset -> hot (each STOP heats it up) -> gold (the twist)
+      const CALM = [[255, 193, 90], [255, 138, 61], [255, 98, 69]];
+      const HOT = [[255, 150, 70], [250, 92, 52], [232, 52, 62]];
+      const GOLD = [[255, 222, 110], [255, 170, 60], [255, 118, 52]];
+
+      const N_BUB = 16;
+      const bubbles = [];
+      function build() {
+        const host = $('#bubbles');
+        for (let i = 0; i < N_BUB; i++) {
+          const el = document.createElement('div');
+          el.className = 'b ' + (i % 2 ? 'l' : 'r');
+          const w = 150 + rnd(i) * 230, h = 74 + rnd(i + 40) * 40;
+          el.style.width = w + 'px';
+          el.style.height = h + 'px';
+          host.appendChild(el);
+          bubbles.push({ el, x: rnd(i + 7) * 1080 - w / 2, base: rnd(i + 13) * 2200, sp: 26 + rnd(i + 19) * 40, rot: (rnd(i + 23) - 0.5) * 16, s: 0.7 + rnd(i + 29) * 0.6 });
+        }
+        $('#fine').textContent = E.fine_print;
+        const night = $('#night');
+        for (let i = 0; i < 46; i++) {
+          const st = document.createElement('div');
+          st.className = 'star';
+          const r = 2 + rnd(i + 300) * 4.5;
+          st.style.cssText = `left:${(rnd(i + 310) * 1080).toFixed(0)}px;top:${(rnd(i + 320) * 1500 + 40).toFixed(0)}px;width:${r.toFixed(1)}px;height:${r.toFixed(1)}px`;
+          night.appendChild(st);
+          stars.push({ el: st, ph: rnd(i + 330) * 6.28 });
+        }
+      }
+      const stars = [];
+
+      function nightAt(sec) {
+        const them3 = E.beats.find((b) => b.kind === 'state' && b.who === 'them' && b.level === 3);
+        const me4 = E.beats.find((b) => b.kind === 'state' && b.who === 'me' && b.level === 4);
+        if (!them3 || !me4) return 0;
+        return win(sec, them3.at - 0.06, them3.at + 0.2) * (1 - win(sec, me4.at - 0.24, me4.at - 0.02));
+      }
+
+      function heat(sec) {
+        let h = 0;
+        for (const b of E.beats) if (b.kind === 'state' && b.who === 'me') h += 0.25 * win(sec, b.at, b.at + 0.5);
+        return clamp(h);
+      }
+
+      function background(sec) {
+        const r = E.reveal, ec = E.endcard;
+        const h = heat(sec);
+        const gold = win(sec, r.scratch + 0.35, r.scratch + 0.75);
+        const pal = [0, 1, 2].map((k) => mix(mix(CALM[k], HOT[k], h), GOLD[k], gold));
+        $('#grad').style.background = `linear-gradient(180deg, ${rgb(pal[0])} 0%, ${rgb(pal[1])} 52%, ${rgb(pal[2])} 100%)`;
+        // the record scratch: a beat of stillness, the world dims
+        const freeze = sec >= r.scratch && sec < r.scratch + 0.38;
+        $('#grad').style.filter = freeze ? 'saturate(0.55) brightness(0.86)' : 'none';
+        const burst = gold * (1 - win(sec, ec.at, ec.at + 0.45));
+        $('#burst').style.opacity = (0.95 * burst).toFixed(3);
+        $('#burst').style.transform = `rotate(${(sec * 14) % 360}deg) scale(${(0.9 + 0.1 * smooth((sec - r.scratch) / 1.2)).toFixed(3)})`;
+        const cream = win(sec, ec.at, ec.at + 0.45);
+        $('#cream').style.opacity = cream.toFixed(3);
+        const nt = nightAt(sec);
+        $('#night').style.opacity = nt.toFixed(3);
+        $('#glow').style.opacity = (1 - 0.6 * nt).toFixed(3);
+        if (nt > 0) stars.forEach((s) => { s.el.style.opacity = (0.45 + 0.55 * Math.abs(Math.sin(sec * 4.2 + s.ph))).toFixed(3); });
+        $('#moon').style.transform = `translateY(${(26 * (1 - smooth(nt))).toFixed(1)}px)`;
+        // floating bubbles drift up, faster as it gets heated; frozen during the scratch
+        const tt = freeze ? r.scratch : sec;
+        bubbles.forEach((b, i) => {
+          const speed = b.sp * (1 + 1.6 * h) * (1 + 0.6 * gold);
+          const y = 2120 - ((b.base + tt * speed * 6) % 2400);
+          const wob = Math.sin(tt * 0.9 + i) * 18;
+          b.el.style.transform = `translate(${(b.x + wob).toFixed(1)}px, ${y.toFixed(1)}px) rotate(${b.rot.toFixed(1)}deg) scale(${b.s.toFixed(3)})`;
+          b.el.style.opacity = ((1 - cream) * (1 - nt)).toFixed(3);
+        });
+      }
+
+      // ---------------------------------------------------------------- stickers
+      const stickers = [];
+      function buildStickers() {
+        const host = $('#stickers');
+        const list = E.stickers.map((s) => ({ ...s }));
+        list.push({ at: E.reveal.scratch, text: 'PLOT TWIST', style: 'twist' });
+        list.sort((a, b) => a.at - b.at);
+        list.forEach((s, k) => {
+          const el = document.createElement('div');
+          el.className = 'sticker ' + s.style;
+          if (s.style === 'pov') el.innerHTML = s.text.replace('STOP', '<b>STOP</b>').replace(' to a ', '<br/>to a ');
+          else if (s.style === 'twist') el.textContent = s.text;
+          else el.innerHTML = `<span class="dot"></span><span>${s.text}</span>`;
+          host.appendChild(el);
+          stickers.push({ ...s, el, rot: s.style === 'twist' ? -5 : (k % 2 ? 2.2 : -2.2), until: null });
+        });
+        for (let k = 0; k < stickers.length; k++) stickers[k].until = k + 1 < stickers.length ? stickers[k + 1].at : 99;
+        stickers[stickers.length - 1].until = E.reveal.flash + 0.05;     // PLOT TWIST leaves when the money card arrives
+      }
+
+      function setStickers(sec) {
+        for (const s of stickers) {
+          const a = sec - s.at;
+          const outT = sec - s.until;
+          if (a < 0 || outT > 0.16) { s.el.style.opacity = '0'; continue; }
+          const pop = backOut(a / (s.style === 'twist' ? 0.34 : 0.3));
+          const out = clamp(outT / 0.16);
+          let sc = (0.55 + 0.45 * pop) * (1 - 0.15 * out);
+          let rot = s.rot;
+          if (s.style === 'twist') { sc *= 1 + 0.04 * Math.sin(a * 22) * Math.exp(-a * 3); rot += 2 * Math.sin(a * 18) * Math.exp(-a * 2.5); }
+          s.el.style.opacity = (clamp(a / 0.08) * (1 - out)).toFixed(3);
+          s.el.style.transform = `translate(-50%, -50%) translateY(${(-40 * out).toFixed(1)}px) rotate(${rot.toFixed(2)}deg) scale(${sc.toFixed(4)})`;
+        }
+      }
+
+      // ---------------------------------------------------------------- the money card and the coins
+      function wordAt(name) {
+        return E.reveal[name];
+      }
+      let MONEY_H = null;
+      function setMoney(sec) {
+        const r = E.reveal, ec = E.endcard;
+        const t0 = r.flash + 0.05;
+        const inn = backOut((sec - t0) / 0.32);
+        const out = win(sec, ec.at - 0.18, ec.at + 0.06);
+        const m = $('#money');
+        m.style.opacity = (clamp((sec - t0) / 0.1) * (1 - out)).toFixed(3);
+        m.style.transform = `translateY(${(30 * (1 - inn) - 60 * out).toFixed(1)}px) scale(${(0.7 + 0.3 * inn).toFixed(4)}) rotate(${(-1.2).toFixed(1)}deg)`;
+        const ls = m.querySelectorAll('.l');
+        const at = r.lines_at || [t0 + 0.08, r.boxes_to - 0.2];             // each row lands as the narrator says it
+        const t1 = Math.max(t0 + 0.08, at[0]), t2 = at[1];
+        [t1, t2].forEach((t, j) => {
+          const a = clamp((sec - t) / 0.22);
+          ls[j].style.opacity = a.toFixed(3);
+          ls[j].style.transform = `translateY(${(14 * (1 - a)).toFixed(1)}px)`;
+        });
+        // the card grows with its rows, like a message being written
+        if (!MONEY_H) {
+          const pb = parseFloat(getComputedStyle(m).paddingBottom);
+          const bottom = (el) => el.offsetTop + el.offsetHeight + pb;
+          MONEY_H = [bottom(ls[0]), bottom(ls[1]), bottom(m.querySelector('.hero'))];
+        }
+        const g2 = smooth((sec - t2 + 0.04) / 0.24), g3 = smooth((sec - r.money_at + 0.02) / 0.28);
+        m.style.height = (MONEY_H[0] + (MONEY_H[1] - MONEY_H[0]) * g2 + (MONEY_H[2] - MONEY_H[1]) * g3).toFixed(1) + 'px';
+        const hero = m.querySelector('.hero');
+        const p = backOut((sec - r.money_at) / 0.42);
+        hero.style.opacity = clamp((sec - r.money_at) / 0.06).toFixed(3);
+        hero.style.transform = `scale(${(0.5 + 0.5 * p).toFixed(4)})`;
+      }
+
+      const SCREEN = { top: 402, h: 1304, left: 240, w: 599 };    // the phone's display in the frame during the reveal (measured)
+      let BOXES = [];
+      function setCoins(sec) {
+        const host = $('#coins');
+        const r = E.reveal;
+        const n = BOXES.length;
+        const bursts = BOXES.map((fy, k) => ({ t: r.boxes_from + k * (r.boxes_to - r.boxes_from) / Math.max(1, n - 1), x: SCREEN.left + fy.x * SCREEN.w, y: SCREEN.top + fy.y * SCREEN.h, count: 3, seed: k * 10 }));
+        bursts.push({ t: r.money_at + 0.05, x: 150, y: 560, count: 5, seed: 99, big: true, dir: -1 });    // two fountains from the
+        bursts.push({ t: r.money_at + 0.08, x: 930, y: 560, count: 5, seed: 120, big: true, dir: 1 });   // card's sides, clear of its text
+        let html = '';
+        for (const b of bursts) {
+          const u = sec - b.t;
+          if (u < 0 || u > 1.15) continue;
+          for (let c = 0; c < b.count; c++) {
+            const ang = b.big ? -Math.PI / 2 + b.dir * (0.35 + rnd(b.seed + c) * 0.7) : -Math.PI / 2.6 + (rnd(b.seed + c) - 0.5) * 1.3;
+            const v = (b.big ? 1500 : 1050) + rnd(b.seed + c + 50) * 500;
+            const x = b.x + Math.cos(ang) * v * u + (b.big ? 0 : 140 * u);
+            const y = b.y + Math.sin(ang) * v * u + 2300 * u * u;
+            const op = clamp(1 - (u - 0.75) / 0.4) * clamp(u / 0.05);
+            const rot = (rnd(b.seed + c + 9) - 0.5) * 720 * u;
+            const sc = (b.big ? 1.1 : 0.85) * (0.7 + 0.3 * clamp(u / 0.12));
+            html += `<div class="coin" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;opacity:${op.toFixed(3)};transform:rotate(${rot.toFixed(1)}deg) scale(${sc.toFixed(3)})">$</div>`;
+          }
+        }
+        host.innerHTML = html;
+      }
+
+      // ---------------------------------------------------------------- the end card
+      function setEnd(sec) {
+        const ec = E.endcard;
+        const t0 = ec.at;
+        $('#end').style.opacity = clamp((sec - t0) / 0.2).toFixed(3);
+        const logo = $('#end .logo');
+        const a = backOut((sec - t0 - 0.05) / 0.4);
+        logo.style.transform = `translateX(-50%) translateY(${(-40 * (1 - a)).toFixed(1)}px) scale(${(0.8 + 0.2 * a).toFixed(4)})`;
+        logo.style.opacity = clamp((sec - t0 - 0.05) / 0.15).toFixed(3);
+        document.querySelectorAll('#end .h > span').forEach((el, j) => {
+          if (el.classList.contains('hl')) return;
+          const b = backOut((sec - t0 - 0.22 - j * 0.2) / 0.34);
+          el.style.opacity = clamp((sec - t0 - 0.22 - j * 0.2) / 0.1).toFixed(3);
+          el.style.transform = `translateY(${(26 * (1 - b)).toFixed(1)}px) scale(${(0.9 + 0.1 * b).toFixed(4)})`;
+        });
+        const s = clamp((sec - t0 - 0.62) / 0.25);
+        $('#end .sub').style.opacity = s.toFixed(3);
+        const u = backOut((sec - t0 - 0.78) / 0.34);
+        const url = $('#end .url');
+        url.style.opacity = clamp((sec - t0 - 0.78) / 0.1).toFixed(3);
+        url.style.transform = `translateX(-50%) scale(${(0.6 + 0.4 * u).toFixed(4)})`;
+        $('#end .fine').style.opacity = clamp((sec - t0 - 1.0) / 0.3).toFixed(3);
+      }
+
+      const img = $('#phone');
+      window.renderFrame = async (i, srcIndex = i) => {
+        const sec = i / E.fps;
+        const src = `${FRAMES}/${String(srcIndex).padStart(4, '0')}.png`;
+        if (img.dataset.src !== src) {
+          img.dataset.src = src;
+          img.src = src;
+          await img.decode().catch(() => {});
+        }
+        background(sec);
+        setStickers(sec);
+        setMoney(sec);
+        setCoins(sec);
+        setEnd(sec);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return true;
+      };
+
+      window.ready = Promise.all([
+        fetch('edit.json').then((r) => r.json()),
+        fetch('../blender/textures/ad2/S10.layout.json').then((r) => r.json()),
+      ]).then(async ([e, lay]) => {
+        E = e;
+        LAY = lay;
+        BOXES = lay.boxes.filter((b) => b.cls.includes('ios-b--in') && b.y > 128 && !b.text.startsWith('CrumbClub: Your'))
+          .map((b) => ({ x: (b.x + b.w) / 402, y: (b.y + b.h / 2) / 874 }));
+        build();
+        buildStickers();
+        await document.fonts.ready;
+        await document.fonts.load('860 92px Inter');
+        if (q.get('play') === '1') {
+          let i = 0;
+          const tick = async () => { await window.renderFrame(i); i = (i + 1) % E.frames; setTimeout(tick, 1000 / E.fps); };
+          tick();
+        }
+        return true;
+      });
+    </script>
+  </body>
+</html>

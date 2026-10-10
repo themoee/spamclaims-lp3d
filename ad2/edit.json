@@ -1,0 +1,329 @@
+{
+ "fps": 30,
+ "duration": 24.431,
+ "frames": 733,
+ "beats": [
+  {
+   "at": 0.0,
+   "kind": "state",
+   "state": 0
+  },
+  {
+   "at": 0.3,
+   "kind": "voice",
+   "line": "B1"
+  },
+  {
+   "at": 2.348,
+   "kind": "state",
+   "state": 1,
+   "who": "me",
+   "level": 0
+  },
+  {
+   "at": 2.348,
+   "kind": "voice",
+   "line": "M1"
+  },
+  {
+   "at": 3.2589999999999995,
+   "kind": "state",
+   "state": 2,
+   "who": "them",
+   "level": 0
+  },
+  {
+   "at": 4.159,
+   "kind": "state",
+   "state": 3,
+   "who": "me",
+   "level": 1
+  },
+  {
+   "at": 4.159,
+   "kind": "voice",
+   "line": "M2"
+  },
+  {
+   "at": 5.015,
+   "kind": "state",
+   "state": 4,
+   "who": "them",
+   "level": 1
+  },
+  {
+   "at": 5.915,
+   "kind": "state",
+   "state": 5,
+   "who": "me",
+   "level": 2
+  },
+  {
+   "at": 5.915,
+   "kind": "voice",
+   "line": "M3"
+  },
+  {
+   "at": 7.021999999999999,
+   "kind": "state",
+   "state": 6,
+   "who": "them",
+   "level": 2
+  },
+  {
+   "at": 7.922,
+   "kind": "state",
+   "state": 7,
+   "who": "me",
+   "level": 3
+  },
+  {
+   "at": 7.922,
+   "kind": "voice",
+   "line": "M4"
+  },
+  {
+   "at": 9.709,
+   "kind": "state",
+   "state": 8,
+   "who": "them",
+   "level": 3
+  },
+  {
+   "at": 10.759,
+   "kind": "state",
+   "state": 9,
+   "who": "me",
+   "level": 4
+  },
+  {
+   "at": 10.759,
+   "kind": "voice",
+   "line": "M5"
+  },
+  {
+   "at": 13.398000000000001,
+   "kind": "state",
+   "state": 10,
+   "who": "them",
+   "level": 4
+  },
+  {
+   "at": 13.398000000000001,
+   "kind": "voice",
+   "line": "B2"
+  }
+ ],
+ "stickers": [
+  {
+   "at": 0.12,
+   "text": "POV: you replied STOP to a cookie company",
+   "style": "pov"
+  },
+  {
+   "at": 2.308,
+   "text": "Me, politely:",
+   "style": "me"
+  },
+  {
+   "at": 3.2189999999999994,
+   "text": "Them:",
+   "style": "them"
+  },
+  {
+   "at": 4.119,
+   "text": "Me, again:",
+   "style": "me"
+  },
+  {
+   "at": 4.975,
+   "text": "Them:",
+   "style": "them"
+  },
+  {
+   "at": 5.875,
+   "text": "Me, louder:",
+   "style": "me"
+  },
+  {
+   "at": 6.981999999999999,
+   "text": "Them:",
+   "style": "them"
+  },
+  {
+   "at": 7.882,
+   "text": "Me, begging:",
+   "style": "me"
+  },
+  {
+   "at": 9.669,
+   "text": "Them, at 2 AM:",
+   "style": "them"
+  },
+  {
+   "at": 10.719000000000001,
+   "text": "Me, unwell:",
+   "style": "me"
+  },
+  {
+   "at": 13.358000000000002,
+   "text": "Them, unbothered:",
+   "style": "them"
+  }
+ ],
+ "reveal": {
+  "spin": [
+   16.578000000000003,
+   17.328000000000003
+  ],
+  "flash": 17.378000000000004,
+  "boxes_from": 17.680000000000003,
+  "boxes_to": 19.014000000000003,
+  "money_at": 19.666,
+  "scratch": 16.148000000000003,
+  "lines_at": [
+   17.345,
+   18.262
+  ]
+ },
+ "endcard": {
+  "at": 20.809,
+  "phone_out": [
+   20.679000000000002,
+   21.379
+  ],
+  "shield": [
+   20.979000000000003,
+   21.679000000000002
+  ],
+  "jingle": 21.979000000000003
+ },
+ "cues": [
+  {
+   "kind": "drop",
+   "at": 0.02
+  },
+  {
+   "kind": "land",
+   "at": 0.52
+  },
+  {
+   "kind": "sent",
+   "at": 2.368,
+   "level": 0
+  },
+  {
+   "kind": "incoming",
+   "at": 3.2589999999999995
+  },
+  {
+   "kind": "sent",
+   "at": 4.178999999999999,
+   "level": 1
+  },
+  {
+   "kind": "incoming",
+   "at": 5.015
+  },
+  {
+   "kind": "sent",
+   "at": 5.935,
+   "level": 2
+  },
+  {
+   "kind": "incoming",
+   "at": 7.021999999999999
+  },
+  {
+   "kind": "sent",
+   "at": 7.941999999999999,
+   "level": 3
+  },
+  {
+   "kind": "incoming",
+   "at": 9.709
+  },
+  {
+   "kind": "sent",
+   "at": 10.779,
+   "level": 4
+  },
+  {
+   "kind": "incoming",
+   "at": 13.398000000000001
+  },
+  {
+   "kind": "scratch",
+   "at": 16.148000000000003
+  },
+  {
+   "kind": "whoosh_spin",
+   "at": 16.578000000000003
+  },
+  {
+   "kind": "shutter",
+   "at": 17.378000000000004
+  },
+  {
+   "kind": "pop_money",
+   "at": 19.69
+  },
+  {
+   "kind": "whoosh_out",
+   "at": 20.679000000000002
+  },
+  {
+   "kind": "jingle",
+   "at": 21.979000000000003
+  }
+ ],
+ "voice": [
+  {
+   "line": "B1",
+   "at": 0.3
+  },
+  {
+   "line": "M1",
+   "at": 2.348
+  },
+  {
+   "line": "M2",
+   "at": 4.159
+  },
+  {
+   "line": "M3",
+   "at": 5.915
+  },
+  {
+   "line": "M4",
+   "at": 7.922
+  },
+  {
+   "line": "M5",
+   "at": 10.759
+  },
+  {
+   "line": "B2",
+   "at": 13.398
+  },
+  {
+   "line": "N1",
+   "at": 16.528
+  },
+  {
+   "line": "N2",
+   "at": 20.929
+  }
+ ],
+ "money_lines": [
+  "Every text after your",
+  "first STOP could be worth",
+  "up to $500*"
+ ],
+ "end_lines": [
+  "Your spam could",
+  "finally pay off."
+ ],
+ "fine_print": "*Statutory damages under the TCPA, per violating text. Not a guarantee; results vary. Not legal advice.",
+ "narrator": "Brian"
+}

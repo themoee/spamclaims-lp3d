@@ -18,3 +18,7 @@ blender/__pycache__/
 # Reel ad build products (frames, audio, video): rebuilt by ad/build.py
 ad/out/
 ad/audio/
+
+# Reel ad 2 build products (frames, audio, video): rebuilt by ad2/build2.py
+ad2/out/
+ad2/audio/
