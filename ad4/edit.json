@@ -1,0 +1,74 @@
+{
+ "fps": 24,
+ "duration": 25.949,
+ "frames": 623,
+ "events": {
+  "one": 0.903,
+  "erupt": 2.8049999999999997,
+  "stream": 4.578,
+  "window": 6.1,
+  "stop": 7.851999999999999,
+  "freeze": 8.032,
+  "shatter": 9.879999999999999,
+  "orange": 11.795,
+  "orange_end": 12.995,
+  "exit": 12.55,
+  "city": 13.638,
+  "lanterns": 15.25,
+  "shield": 19.8,
+  "end": 21.0
+ },
+ "voice": [
+  {
+   "line": "V1",
+   "at": 0.4,
+   "dur": 5.072
+  },
+  {
+   "line": "V2",
+   "at": 7.3,
+   "dur": 1.031
+  },
+  {
+   "line": "V3",
+   "at": 9.7,
+   "dur": 0.951
+  },
+  {
+   "line": "V4",
+   "at": 11.6,
+   "dur": 1.656
+  },
+  {
+   "line": "V5",
+   "at": 13.45,
+   "dur": 2.021
+  },
+  {
+   "line": "V6",
+   "at": 20.3,
+   "dur": 4.599
+  }
+ ],
+ "titles": [
+  {
+   "at": 7.25,
+   "until": 9.829999999999998,
+   "text": "You said STOP.",
+   "hl": "STOP."
+  },
+  {
+   "at": 9.879999999999999,
+   "until": 11.5,
+   "text": "They kept texting.",
+   "hl": "texting."
+  },
+  {
+   "at": 11.684999999999999,
+   "until": 15.771,
+   "text": "Every text after STOP|may be a violation|of federal law.",
+   "hl": "violation"
+  }
+ ],
+ "fine_print": "SpamClaims is not a law firm and does not give legal advice. Not every text qualifies; eligibility depends on facts and location. Time limits apply."
+}

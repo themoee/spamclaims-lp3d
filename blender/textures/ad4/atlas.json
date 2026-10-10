@@ -1,0 +1,250 @@
+{
+ "cols": 8,
+ "rows": 6,
+ "tile": [
+  512,
+  256
+ ],
+ "tiles": [
+  {
+   "k": 0,
+   "text": "Lumalane: Flash sale! 30% off everything this weekend",
+   "lines": 2
+  },
+  {
+   "k": 1,
+   "text": "PizzaPal: 2 large pizzas for $15 tonight only!",
+   "lines": 2
+  },
+  {
+   "k": 2,
+   "text": "GlowMart: Your cart misses you. Come back for 20% off",
+   "lines": 2
+  },
+  {
+   "k": 3,
+   "text": "FitCore: Your membership deal ends at midnight",
+   "lines": 2
+  },
+  {
+   "k": 4,
+   "text": "AutoMax: Your car could be worth more than you think",
+   "lines": 2
+  },
+  {
+   "k": 5,
+   "text": "HomeFast: Still thinking about selling your home?",
+   "lines": 2
+  },
+  {
+   "k": 6,
+   "text": "QuickLend: You're pre-approved. Reply YES to claim",
+   "lines": 3
+  },
+  {
+   "k": 7,
+   "text": "SunWave Solar: Cut your power bill by 40%",
+   "lines": 2
+  },
+  {
+   "k": 8,
+   "text": "Brightlane: Last chance! Free shipping ends tonight",
+   "lines": 2
+  },
+  {
+   "k": 9,
+   "text": "TrendHive: New arrivals just dropped. Shop now",
+   "lines": 2
+  },
+  {
+   "k": 10,
+   "text": "CrumbClub: Your cookies miss you! 30% off today",
+   "lines": 2
+  },
+  {
+   "k": 11,
+   "text": "StyleNest: VIP sale starts NOW. Don't miss it",
+   "lines": 2
+  },
+  {
+   "k": 12,
+   "text": "PetPals: Treat your pup! 25% off toys and food",
+   "lines": 2
+  },
+  {
+   "k": 13,
+   "text": "ZipCart: Your order is waiting. Complete checkout",
+   "lines": 2
+  },
+  {
+   "k": 14,
+   "text": "MegaDeals: Doorbuster prices all weekend long",
+   "lines": 2
+  },
+  {
+   "k": 15,
+   "text": "CoolAir HVAC: Book your tune-up for just $49",
+   "lines": 2
+  },
+  {
+   "k": 16,
+   "text": "SnackBox: Free snacks with your next order",
+   "lines": 2
+  },
+  {
+   "k": 17,
+   "text": "UrbanFit: Leggings 2 for $30. Today only",
+   "lines": 2
+  },
+  {
+   "k": 18,
+   "text": "FreshBowl: Lunch is on us! Use code YUM",
+   "lines": 2
+  },
+  {
+   "k": 19,
+   "text": "SkyTel: Upgrade your phone for $0 down",
+   "lines": 2
+  },
+  {
+   "k": 20,
+   "text": "Reply STOP to opt out. Msg & data rates may apply",
+   "lines": 2
+  },
+  {
+   "k": 21,
+   "text": "DealDash: Prices drop at 9 PM. Set a reminder",
+   "lines": 2
+  },
+  {
+   "k": 22,
+   "text": "GreenLeaf Lawn: Spring special, first cut free",
+   "lines": 2
+  },
+  {
+   "k": 23,
+   "text": "CasaFurn: Sofas up to 60% off this week",
+   "lines": 2
+  },
+  {
+   "k": 24,
+   "text": "Glossaria: Your favorite shade is back in stock",
+   "lines": 2
+  },
+  {
+   "k": 25,
+   "text": "TurboWash: Unlimited car washes $19.99/mo",
+   "lines": 2
+  },
+  {
+   "k": 26,
+   "text": "BeanBar: Your free coffee expires tomorrow",
+   "lines": 2
+  },
+  {
+   "k": 27,
+   "text": "MoveIt: Moving soon? Get a free quote today",
+   "lines": 2
+  },
+  {
+   "k": 28,
+   "text": "RoofRight: Storm damage? Free inspection",
+   "lines": 2
+  },
+  {
+   "k": 29,
+   "text": "ShoeVault: Flash sale! Extra 40% off clearance",
+   "lines": 2
+  },
+  {
+   "k": 30,
+   "text": "HappyPaws Vet: Time for Max's checkup",
+   "lines": 2
+  },
+  {
+   "k": 31,
+   "text": "LuxeLeaf: We saved your faves. 15% off inside",
+   "lines": 2
+  },
+  {
+   "k": 32,
+   "text": "NovaBank: Open an account, get a bonus",
+   "lines": 2
+  },
+  {
+   "k": 33,
+   "text": "DriveSafe Ins: Lower your rate in 2 minutes",
+   "lines": 2
+  },
+  {
+   "k": 34,
+   "text": "FlexGym: Rejoin for $1. This week only",
+   "lines": 2
+  },
+  {
+   "k": 35,
+   "text": "TasteTrail: Your meal kit discount is waiting",
+   "lines": 2
+  },
+  {
+   "k": 36,
+   "text": "ClickShop: Items in your cart are selling out",
+   "lines": 2
+  },
+  {
+   "k": 37,
+   "text": "WindowPro: Replacement windows, 0% financing",
+   "lines": 2
+  },
+  {
+   "k": 38,
+   "text": "BrightSmile: Teeth whitening $99 this month",
+   "lines": 2
+  },
+  {
+   "k": 39,
+   "text": "GameZone: Pre-order now and save 20%",
+   "lines": 2
+  },
+  {
+   "k": 40,
+   "text": "+1 (877) 555-0147: Reminder! Sale ends tonight",
+   "lines": 3
+  },
+  {
+   "k": 41,
+   "text": "+1 (844) 555-0182: Your exclusive offer inside",
+   "lines": 2
+  },
+  {
+   "k": 42,
+   "text": "Lumalane: Summer drop is LIVE. Shop before it's gone",
+   "lines": 2
+  },
+  {
+   "k": 43,
+   "text": "PizzaPal: Hungry? Free delivery for 2 hours",
+   "lines": 2
+  },
+  {
+   "k": 44,
+   "text": "GlowMart: Restock alert! Back in limited sizes",
+   "lines": 2
+  },
+  {
+   "k": 45,
+   "text": "FitCore: Bring a friend, both get 50% off",
+   "lines": 2
+  },
+  {
+   "k": 46,
+   "text": "AutoMax: Trade-in values just went UP",
+   "lines": 2
+  },
+  {
+   "k": 47,
+   "text": "HomeFast: Your neighbor's home just sold!",
+   "lines": 2
+  }
+ ]
+}

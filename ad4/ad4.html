@@ -1,0 +1,127 @@
+<!doctype html>
+<!-- Ad 4 ("The Swarm") compositor, 1080x1920: the Blender frames (blender/frames/ad4) with the cinematic titles and
+     the end card over the sky (the shield of lanterns stays the hero). capture4.cjs calls renderFrame(i). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SpamClaims Reel 4</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Hind:wght@400;500;600;700&display=block" />
+    <style>
+      :root { --yellow: #ffe066; --pink: #ff5ca6; --green: #34c759; --ink: #140c27; }
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #frame { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .title { position: absolute; left: 0; right: 0; text-align: center; color: #fff; font: 400 82px/1.06 'Archivo Black';
+        letter-spacing: -0.01em; text-shadow: 0 0 30px rgb(0 0 0 / 0.65), 0 4px 18px rgb(0 0 0 / 0.55); opacity: 0; }
+      .title span { display: block; }
+      .title .g { color: var(--green); display: inline; }
+      .title .y { color: var(--yellow); display: inline; }
+      #shade { position: absolute; left: 0; right: 0; top: 0; height: 760px; opacity: 0;
+        background: linear-gradient(180deg, rgb(8 6 22 / 0.0) 0%, rgb(8 6 22 / 0.55) 28%, rgb(8 6 22 / 0.45) 62%, rgb(8 6 22 / 0) 100%); }
+      #end { position: absolute; inset: 0; opacity: 0; }
+      #end .logo { position: absolute; left: 50%; top: 292px; width: 560px; transform: translateX(-50%); filter: drop-shadow(0 8px 24px rgb(0 0 0 / 0.5)); }
+      #end .h { position: absolute; left: 0; right: 0; top: 418px; text-align: center; color: #fff; font: 400 58px/1.05 'Archivo Black';
+        text-shadow: 0 4px 22px rgb(0 0 0 / 0.6); }
+      #end .cta { position: absolute; left: 50%; top: 498px; width: 600px; height: 106px; margin-left: -300px; border-radius: 53px; background: var(--pink);
+        box-shadow: 12px 12px 0 var(--yellow), 0 16px 40px rgb(0 0 0 / 0.45); display: grid; place-items: center; font: 400 48px/1 'Archivo Black'; color: var(--ink); }
+      #end .chips { position: absolute; left: 0; right: 0; top: 636px; text-align: center; font: 700 28px/1 'Hind'; letter-spacing: 0.2em; color: rgb(255 255 255 / 0.85);
+        text-shadow: 0 2px 10px rgb(0 0 0 / 0.7); }
+      #end .fine { position: absolute; left: 120px; right: 120px; top: 1262px; text-align: center; font: 500 21px/1.32 'Hind'; color: rgb(255 255 255 / 0.72);
+        text-shadow: 0 2px 8px rgb(0 0 0 / 0.9); }
+    </style>
+  </head>
+  <body>
+    <img id="frame" alt="" />
+    <div id="shade"></div>
+    <div id="titles"></div>
+    <div id="end">
+      <img class="logo" src="../public/logo-reversed.png" alt="SpamClaims.com" />
+      <div class="h">See if your texts may qualify</div>
+      <div class="cta">spamclaims.com</div>
+      <div class="chips">FREE TO CHECK &nbsp;·&nbsp; NO SIGN-UP</div>
+      <div class="fine" id="fine"></div>
+    </div>
+    <script>
+      const q = new URLSearchParams(location.search);
+      const FRAMES = q.get('frames') || '../blender/frames/ad4';
+      const $ = (s) => document.querySelector(s);
+      const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+      const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+      const backOut = (x, c = 1.4) => { const s = clamp(x) - 1; return 1 + (c + 1) * s * s * s + c * s * s; };
+      let E = null;
+      const TITLE_Y = [300, 300, 290];
+
+      function buildTitles() {
+        const host = $('#titles');
+        E.titles.forEach((t, k) => {
+          const el = document.createElement('div');
+          el.className = 'title';
+          el.style.top = `${TITLE_Y[k] || 300}px`;
+          const hl = t.hl;
+          el.innerHTML = t.text.split('|').map((ln) => {
+            const esc = ln.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+            if (!hl || !ln.includes(hl)) return `<span>${esc}</span>`;
+            const cls = hl.startsWith('STOP') ? 'g' : 'y';
+            return `<span>${esc.replace(hl, `<span class="${cls}">${hl}</span>`)}</span>`;
+          }).join('');
+          host.appendChild(el);
+          t.el = el;
+        });
+      }
+
+      function setTitles(sec) {
+        let any = 0;
+        E.titles.forEach((t) => {
+          const a = smooth((sec - t.at) / 0.22), b = 1 - smooth((sec - t.until + 0.2) / 0.2);
+          const v = Math.min(a, b);
+          const p = backOut((sec - t.at) / 0.35);
+          t.el.style.opacity = v.toFixed(3);
+          t.el.style.filter = `blur(${(6 * (1 - clamp((sec - t.at) / 0.25))).toFixed(2)}px)`;
+          t.el.style.transform = `scale(${(1.1 - 0.1 * p).toFixed(4)})`;
+          any = Math.max(any, v);
+        });
+        return any;
+      }
+
+      function setEnd(sec) {
+        const t = sec - E.events.end;
+        $('#end').style.opacity = clamp(t / 0.35).toFixed(3);
+        const lp = backOut((t - 0.05) / 0.45);
+        $('#end .logo').style.transform = `translateX(-50%) translateY(${(-24 * (1 - lp)).toFixed(1)}px) scale(${(0.88 + 0.12 * lp).toFixed(4)})`;
+        $('#end .h').style.opacity = clamp((t - 0.25) / 0.3).toFixed(3);
+        const cp = backOut((t - 0.45) / 0.4, 1.8);
+        $('#end .cta').style.opacity = clamp((t - 0.45) / 0.12).toFixed(3);
+        $('#end .cta').style.transform = `scale(${(0.7 + 0.3 * cp).toFixed(4)})`;
+        $('#end .chips').style.opacity = clamp((t - 0.7) / 0.3).toFixed(3);
+        $('#end .fine').style.opacity = clamp((t - 0.8) / 0.3).toFixed(3);
+        return clamp(t / 0.35);
+      }
+
+      const img = $('#frame');
+      window.renderFrame = async (i) => {
+        const sec = i / E.fps;
+        const src = `${FRAMES}/${String(i).padStart(4, '0')}.png`;
+        if (img.dataset.src !== src) {
+          img.dataset.src = src;
+          img.src = src;
+          await img.decode().catch(() => {});
+        }
+        const tv = setTitles(sec);
+        const ev = setEnd(sec);
+        $('#shade').style.opacity = Math.max(0.65 * tv, ev).toFixed(3);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return true;
+      };
+
+      window.ready = (async () => {
+        E = await fetch('edit.json').then((r) => r.json());
+        $('#fine').textContent = E.fine_print;
+        buildTitles();
+        await document.fonts.ready;
+        await Promise.all(['400 82px "Archivo Black"', '700 28px "Hind"'].map((f) => document.fonts.load(f)));
+        return true;
+      })();
+    </script>
+  </body>
+</html>
