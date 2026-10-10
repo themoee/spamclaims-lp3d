@@ -218,6 +218,10 @@ else:
         (0.925, "EMBLEM", (0.50, 0.56, 0.44, 60, 5.6, 0.010, 0.0)),
         (1.000, "EMBLEM", (0.50, 0.56, 0.41, 60, 5.6, 0.012, 0.0)),
     ]
+if args.get("adcam") == "1" and not DESKTOP:
+    # the Reel's end card stacks logo, headline and URL above the shield: the shield sits lower and smaller
+    SHOTS[-2] = (0.925, "EMBLEM", (0.50, 0.63, 0.52, 60, 5.6, 0.010, 0.0))
+    SHOTS[-1] = (1.000, "EMBLEM", (0.50, 0.63, 0.50, 60, 5.6, 0.012, 0.0))
 SHOT_TRACK = Track([(tk, p) for tk, _, p in SHOTS])
 SHOT_SUBJ = [s for _, s, _ in SHOTS]
 
@@ -865,14 +869,22 @@ def apply(t):
     bpy.context.view_layer.update()
 
 
-frames = ONLY if ONLY is not None else list(range(START, END + 1, STEP))
-for i in frames:
-    t = i / (N - 1)
+if args.get("tfile"):          # an edit: render an explicit list of story moments, in order (the Reel ad)
+    TLIST = json.load(open(os.path.join(HERE, args["tfile"]), encoding="utf-8"))
+    TLIST = TLIST["t"] if isinstance(TLIST, dict) else TLIST
+    jobs = [(i, float(t)) for i, t in enumerate(TLIST)]
+    if ONLY is not None:
+        jobs = [jobs[i] for i in ONLY]
+    else:
+        jobs = jobs[START:END + 1 if "end" in args else None:STEP]
+else:
+    jobs = [(i, i / (N - 1)) for i in (ONLY if ONLY is not None else range(START, END + 1, STEP))]
+for i, t in jobs:
     path = os.path.join(OUT, f"{i:04d}.png")
     if os.path.exists(path) and not FORCE:
         continue
     apply(t)
     scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
-    print(f"FRAME {i} t={t:.3f}", flush=True)
-print("DONE", len(frames))
+    print(f"FRAME {i} t={t:.4f}", flush=True)
+print("DONE", len(jobs))

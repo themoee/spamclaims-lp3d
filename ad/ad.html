@@ -1,0 +1,153 @@
+<!doctype html>
+<!-- The Reel / Story ad compositor: one rendered Blender frame + the captions and end card, at exactly 1080x1920.
+     capture.cjs calls window.renderFrame(i) for every frame and screenshots the page. Open it in a browser with
+     ?frames=../blender/frames/ad&play=1 to watch it live. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SpamClaims Reel</title>
+    <style>
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; src: url(../public/fonts/inter-latin-opsz-normal.woff2) format('woff2'); }
+      :root { --orange: #ff9d45; --orange-2: #f58220; --fg: #f7f8fb; }
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000411; }
+      body { font-family: 'Inter', system-ui, sans-serif; color: var(--fg); -webkit-font-smoothing: antialiased; font-optical-sizing: auto; }
+      #frame { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      /* legibility: a soft shade behind the caption band only (the phone sits low and stays untouched) */
+      .shade { position: absolute; inset: 0 0 auto 0; height: 980px; pointer-events: none;
+        background: linear-gradient(180deg, rgb(0 4 17 / 0.82) 0%, rgb(0 4 17 / 0.62) 30%, rgb(0 4 17 / 0.22) 62%, rgb(0 4 17 / 0) 100%); }
+      /* captions live inside the safe band: below the top 250 px, far above the Reels UI at the bottom */
+      .cap { position: absolute; left: 70px; right: 70px; top: 300px; text-align: center; }
+      .line { display: block; font-weight: 820; letter-spacing: -0.035em; line-height: 1.02; font-size: 92px;
+        text-wrap: balance; text-shadow: 0 6px 40px rgb(0 0 0 / 0.55); opacity: 0; transform: translateY(26px); }
+      .cap.hook .line { font-size: 86px; }
+      .hl { color: var(--orange); }
+      .end { position: absolute; inset: 0; opacity: 0; }
+      .end .logo { position: absolute; left: 50%; top: 262px; width: 560px; transform: translateX(-50%); }
+      .end .cap { top: 448px; }
+      .end .sub { position: absolute; left: 0; right: 0; top: 664px; text-align: center; font-size: 42px; font-weight: 600; color: #dfe4ee; letter-spacing: -0.01em; }
+      .end .url { position: absolute; left: 50%; top: 744px; transform: translateX(-50%); padding: 20px 44px; border-radius: 999px;
+        font-size: 46px; font-weight: 750; letter-spacing: -0.01em; color: #fff;
+        background: linear-gradient(180deg, var(--orange), var(--orange-2) 70%); box-shadow: 0 18px 50px -12px rgb(245 130 32 / 0.65), inset 0 2px 0 rgb(255 255 255 / 0.25); }
+      .badge { position: absolute; left: 50%; top: 168px; transform: translateX(-50%); display: none; }
+      /* the money line: "up to $500*" with the number as the hero */
+      .cap.money { top: 262px; }
+      .cap.money .line { font-size: 76px; }
+      .cap.money .line.hero { margin-top: 10px; display: flex; align-items: baseline; justify-content: center; gap: 22px; transform-origin: 50% 70%; }
+      .cap.money .small { font-size: 68px; font-weight: 760; color: #e8ecf4; }
+      .cap.money .big { font-size: 206px; font-weight: 880; letter-spacing: -0.055em; line-height: 0.9;
+        background: linear-gradient(180deg, #ffd29a 0%, var(--orange) 45%, var(--orange-2) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+        filter: drop-shadow(0 10px 40px rgb(245 130 32 / 0.45)); }
+      .cap.money sup { font-size: 80px; font-weight: 800; color: var(--orange); align-self: flex-start; margin-left: -14px; }
+      .end .fine { position: absolute; left: 110px; right: 110px; top: 862px; text-align: center; font-size: 25px; line-height: 1.35; color: #a6afc2; font-weight: 500; }
+    </style>
+  </head>
+  <body>
+    <img id="frame" alt="" />
+    <div class="shade" id="shade"></div>
+    <div id="caps"></div>
+    <div class="end" id="end">
+      <img class="logo" src="../public/logo-reversed.png" alt="SpamClaims.com" />
+      <div class="cap end-cap" id="endcap"></div>
+      <div class="sub">Free to check · No sign-up</div>
+      <div class="url">spamclaims.com</div>
+      <div class="fine" id="fine"></div>
+    </div>
+    <script>
+      const q = new URLSearchParams(location.search);
+      const FRAMES = q.get('frames') || '../blender/frames/ad';
+      let edit = null;
+      const img = document.getElementById('frame');
+      const caps = document.getElementById('caps');
+      const end = document.getElementById('end');
+      const endcap = document.getElementById('endcap');
+      const shade = document.getElementById('shade');
+
+      const ease = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+      const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      const markup = (line) =>
+        esc(line).replace(/(17 days later,|may qualify\.|\bSTOP\b[.?]?)/g, '<span class="hl">$1</span>');
+      const moneyLine = (line) => {
+        const m = line.match(/^(up to )?\$(\d[\d,]*)(\*?)$/);
+        if (!m) return markup(line);
+        return `${m[1] ? '<span class="small">up to</span>' : ''}<span class="big">$${m[2]}</span>${m[3] ? '<sup>*</sup>' : ''}`;
+      };
+      const backOut = (x) => {
+        const c1 = 1.9, c3 = c1 + 1, s = Math.min(1, Math.max(0, x)) - 1;
+        return 1 + c3 * s * s * s + c1 * s * s;
+      };
+
+      function build() {
+        caps.innerHTML = '';
+        edit.captions.forEach((c, k) => {
+          const el = document.createElement('div');
+          el.className = `cap ${c.style}`;
+          el.dataset.k = k;
+          el.innerHTML = c.lines
+            .map((l, j) =>
+              c.style === 'money' && j === c.lines.length - 1
+                ? `<span class="line hero">${moneyLine(l)}</span>`
+                : `<span class="line">${markup(l)}</span>`,
+            )
+            .join('');
+          if (c.style === 'end') {
+            endcap.innerHTML = el.innerHTML; // the end card's headline lives in the (already positioned) end card
+            return;
+          }
+          caps.appendChild(el);
+        });
+      }
+
+      function setCaptions(sec) {
+        edit.captions.forEach((c, k) => {
+          const host = c.style === 'end' ? endcap : caps.querySelector(`[data-k="${k}"]`);
+          const lines = host.querySelectorAll('.line');
+          lines.forEach((ln, j) => {
+            const tin = c.in + j * 0.22;                      // lines land one after another
+            const a = ease((sec - tin) / 0.28);
+            const b = c.style === 'end' ? 1 : 1 - ease((sec - (c.out - 0.16)) / 0.16);
+            const o = Math.min(a, b);
+            ln.style.opacity = o.toFixed(3);
+            if (ln.classList.contains('hero')) {
+              // the number lands with a punch: it pops from 55 % past full size and settles
+              const p = backOut((sec - tin) / 0.42);
+              ln.style.transform = `translateY(${(-(1 - b) * 14).toFixed(1)}px) scale(${(0.55 + 0.45 * p).toFixed(4)})`;
+            } else {
+              ln.style.transform = `translateY(${((1 - a) * 26 - (1 - b) * 14).toFixed(1)}px) scale(${(0.985 + 0.015 * a).toFixed(4)})`;
+            }
+          });
+        });
+        const endIn = ease((sec - edit.captions[edit.captions.length - 1].in + 0.12) / 0.4);
+        end.style.opacity = endIn.toFixed(3);
+        shade.style.opacity = (1 - 0.15 * endIn).toFixed(3);
+      }
+
+      window.renderFrame = async (i, srcIndex = i) => {
+        const sec = i / edit.fps;
+        const src = `${FRAMES}/${String(srcIndex).padStart(4, '0')}.png`;
+        if (img.dataset.src !== src) {
+          img.dataset.src = src;
+          img.src = src;
+          await img.decode().catch(() => {});
+        }
+        setCaptions(sec);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return true;
+      };
+
+      window.ready = fetch('edit.json').then((r) => r.json()).then(async (e) => {
+        edit = e;
+        build();
+        document.getElementById('fine').textContent = e.fine_print || '';
+        await document.fonts.ready;
+        await document.fonts.load('820 92px Inter');
+        if (q.get('play') === '1') {
+          let i = 0;
+          const tick = async () => { await window.renderFrame(i); i = (i + 1) % edit.t.length; setTimeout(tick, 1000 / edit.fps); };
+          tick();
+        }
+        return true;
+      });
+    </script>
+  </body>
+</html>
