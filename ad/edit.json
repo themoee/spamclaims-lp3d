@@ -696,6 +696,10 @@
   {
    "kind": "pop",
    "at": 12.647
+  },
+  {
+   "kind": "jingle",
+   "at": 13.0
   }
  ],
  "variant": "a"

@@ -143,7 +143,7 @@ def place(x, at, gain=1.0, pan=0.0):
     mix[i:i + len(x), 1] += gain * r * x
 
 
-OVR_GAIN = {"ding": 0.45, "ding_again": 0.6, "send": 0.6, "freeze": 0.62, "storm": 0.8, "shutter": 0.55, "scan": 0.32, "pop": 0.55}
+OVR_GAIN = {"ding": 0.45, "ding_again": 0.6, "send": 0.6, "freeze": 0.62, "storm": 0.8, "shutter": 0.55, "scan": 0.32, "pop": 0.55, "jingle": 0.5}
 dings = 0
 for c in edit["cues"]:
     k, at = c["kind"], c["at"]
@@ -175,6 +175,8 @@ for c in edit["cues"]:
         place(merge(), at - 0.35, 0.8)
     elif k == "pop":
         place(pop(), at, 1.0)
+    elif k == "jingle":                                      # fallback if the ElevenLabs jingle is missing
+        place(ding(1.25, 0.8), at, 0.7)
 
 mix = mix[: int(DUR * SR)]
 peak = np.max(np.abs(mix))

@@ -793,15 +793,37 @@ def back_out(s, c1=1.70158):
     return 1.0 + c3 * (s - 1.0) ** 3 + c1 * (s - 1.0) ** 2
 
 
+AD_SEC = None                                   # the ad second being rendered (tfile mode), else None
+JINGLE_AT = float(args.get("jingle", "13.0"))    # the ad second the shield jingles
+
+
+def jingle(sec):
+    """A bell-like jingle in ad time: a quick side-to-side swing that dies out, a little hop, then an idle sway."""
+    if sec is None or sec < JINGLE_AT:
+        return 0.0, 0.0, 0.0
+    u = sec - JINGLE_AT
+    decay = math.exp(-1.7 * u)
+    yaw = 13.0 * decay * math.sin(2 * math.pi * 2.3 * u)
+    roll = 6.0 * decay * math.sin(2 * math.pi * 2.3 * u + 0.9)
+    hop = 0.035 * math.exp(-3.0 * u) * abs(math.sin(2 * math.pi * 2.3 * u))
+    idle = 3.0 * math.sin(2 * math.pi * 0.45 * u) * min(1.0, u / 0.8)
+    return yaw + idle, roll, hop
+
+
 def emblem_state(t):
     """The read screenshot folds into the shield: it grows out of the card's last position with a half turn."""
     g = clamp((t - (MERGE_T1 - 0.012)) / 0.050)
     grow = back_out(g)
     EMB_TURN.location = EMBLEM_AT
-    sway = 5.0 * math.sin((t - 0.94) * 14.0) * win(t, 0.94, 1.0)
     spin = -150.0 * (1 - smooth(g))
-    EMB_TURN.rotation_euler = Euler((math.radians(4.0 * (1 - g)), 0.0, math.radians(spin + sway)), "XYZ")
-    s = max(grow, 1e-4)
+    if AD_SEC is not None and args.get("adcam") == "1":
+        yaw, roll, hop = jingle(AD_SEC)          # the Reel's end card: the logo jingles
+        EMB_TURN.rotation_euler = Euler((math.radians(4.0 * (1 - g)), math.radians(roll), math.radians(spin + yaw)), "XYZ")
+        s = max(grow * (1 + hop), 1e-4)
+    else:
+        sway = 5.0 * math.sin((t - 0.94) * 14.0) * win(t, 0.94, 1.0)
+        EMB_TURN.rotation_euler = Euler((math.radians(4.0 * (1 - g)), 0.0, math.radians(spin + sway)), "XYZ")
+        s = max(grow, 1e-4)
     EMB_TURN.scale = (s, s, s)
     set_visible(EMB, g > 0.0)
 
@@ -870,8 +892,9 @@ def apply(t):
 
 
 if args.get("tfile"):          # an edit: render an explicit list of story moments, in order (the Reel ad)
-    TLIST = json.load(open(os.path.join(HERE, args["tfile"]), encoding="utf-8"))
-    TLIST = TLIST["t"] if isinstance(TLIST, dict) else TLIST
+    _edit = json.load(open(os.path.join(HERE, args["tfile"]), encoding="utf-8"))
+    AD_FPS = float(_edit.get("fps", 30)) if isinstance(_edit, dict) else 30.0
+    TLIST = _edit["t"] if isinstance(_edit, dict) else _edit
     jobs = [(i, float(t)) for i, t in enumerate(TLIST)]
     if ONLY is not None:
         jobs = [jobs[i] for i in ONLY]
@@ -883,6 +906,8 @@ for i, t in jobs:
     path = os.path.join(OUT, f"{i:04d}.png")
     if os.path.exists(path) and not FORCE:
         continue
+    if args.get("tfile"):
+        AD_SEC = i / AD_FPS
     apply(t)
     scene.render.filepath = path
     bpy.ops.render.render(write_still=True)

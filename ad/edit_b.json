@@ -518,69 +518,49 @@
  "captions": [
   {
    "in": 0.15,
-   "out": 3.58,
+   "out": 3.0,
    "lines": [
     "Got texts after STOP?",
     "Each one could be worth",
     "up to $500*"
    ],
    "style": "money",
-   "cascade": 0.34,
-   "line_at": [
-    0.1,
-    0.44,
-    0.78
-   ]
+   "cascade": 0.34
   },
   {
-   "in": 3.6,
-   "out": 4.778,
+   "in": 3.7,
+   "out": 5.62,
    "lines": [
     "You replied STOP."
    ],
-   "style": "beat",
-   "line_at": [
-    3.6
-   ]
+   "style": "beat"
   },
   {
-   "in": 4.778,
-   "out": 6.73,
+   "in": 5.62,
+   "out": 6.68,
    "lines": [
     "They said you were",
     "unsubscribed."
    ],
-   "style": "beat",
-   "line_at": [
-    4.778,
-    5.556
-   ]
+   "style": "beat"
   },
   {
-   "in": 6.75,
-   "out": 9.43,
+   "in": 6.82,
+   "out": 9.36,
    "lines": [
     "17 days later,",
     "they texted again."
    ],
-   "style": "beat",
-   "line_at": [
-    6.75,
-    8.09
-   ]
+   "style": "beat"
   },
   {
-   "in": 9.45,
-   "out": 12.13,
+   "in": 9.48,
+   "out": 11.98,
    "lines": [
     "Texts after STOP may",
     "violate federal law."
    ],
-   "style": "beat",
-   "line_at": [
-    9.45,
-    10.802
-   ]
+   "style": "beat"
   },
   {
    "in": 12.15,
@@ -589,11 +569,7 @@
     "See if your texts",
     "may qualify."
    ],
-   "style": "end",
-   "line_at": [
-    12.15,
-    12.602
-   ]
+   "style": "end"
   }
  ],
  "fine_print": "*Statutory damages under the TCPA, per violating text. Not a guarantee; results vary. Not legal advice.",
@@ -697,6 +673,10 @@
   {
    "kind": "pop",
    "at": 12.647
+  },
+  {
+   "kind": "jingle",
+   "at": 13.0
   }
  ],
  "variant": "b"

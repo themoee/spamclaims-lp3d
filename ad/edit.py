@@ -115,7 +115,9 @@ for kind, ts in BEATS.items():
         sec = ad_time(t)
         if sec is not None:
             cues.append({"kind": kind, "at": round(sec, 3)})
-cues += [{"kind": "storm", "at": round(ad_time(0.430), 3), "until": 9.40},
+JINGLE_AT = 13.0          # the shield's wiggle on the end card (blender/story.py jingle(), same second)
+cues += [{"kind": "jingle", "at": JINGLE_AT},
+         {"kind": "storm", "at": round(ad_time(0.430), 3), "until": 9.40},
          {"kind": "cut", "at": 9.40}, {"kind": "cut", "at": 6.70}]
 cues.sort(key=lambda c: c["at"])
 
