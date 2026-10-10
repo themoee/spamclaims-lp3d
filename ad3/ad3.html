@@ -1,0 +1,581 @@
+<!doctype html>
+<!-- Ad 3 ("The 10-second check") compositor, 1080x1920. A native screen-recording tutorial: the real iOS Messages
+     screen (the iOS kit, live in iframes, scaled to full width), a Messages search, tap and push transitions, the texts
+     after STOP numbered, the checklist (cut B adds the statute card), a screenshot flying to the landing page, and an
+     end card styled like /lp/stop. Everything is a pure function of time; capture3.cjs calls renderFrame(i).
+     ?edit=edit_a.json | edit_b.json, ?play=1 to watch. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SpamClaims Reel 3</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Hind:wght@400;500;600;700&display=block" />
+    <style>
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; src: url(../public/fonts/inter-latin-opsz-normal.woff2) format('woff2'); }
+      @font-face { font-family: 'Inter Kit'; src: url(../../ios-ui-kit/fonts/inter-latin-opsz-normal.woff2) format('woff2'); font-weight: 100 900; }
+      :root { --ink: #140c27; --deep: #1f153f; --glow: #2c1f63; --yellow: #ffe066; --pink: #ff5ca6; --orange: #ff7a1a; --green: #2fbf62; }
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #fff; }
+      body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+      .scr { position: absolute; left: 0; top: 0; width: 402px; height: 874px; transform-origin: 0 0; overflow: hidden; background: #fff; }
+      .scr iframe { position: absolute; left: 0; top: 0; width: 402px; height: 874px; border: 0; display: block; }
+      .ov { position: absolute; inset: 0; pointer-events: none; }
+      #dim { position: absolute; inset: 0; background: #140c27; opacity: 0; pointer-events: none; z-index: 10; }
+
+      /* the Messages search screen (pt units: the 402 x 874 screen) */
+      #search .bg { position: absolute; inset: 54px 0 0 0; background: #fff; }
+      #search .title { position: absolute; left: 20px; top: 70px; font: 700 34px/41px 'Inter Kit', 'Inter'; letter-spacing: 0.2px; color: #000; }
+      #search .field { position: absolute; left: 16px; right: 16px; top: 118px; height: 38px; border-radius: 19px; background: #eeeef0; }
+      #search .field svg { position: absolute; left: 11px; top: 10px; }
+      #search .ph { position: absolute; left: 38px; top: 9px; font: 400 17px/20px 'Inter Kit', 'Inter'; color: #8a8a8e; white-space: pre; }
+      #search .typed { color: #000; }
+      #search .caret { display: inline-block; width: 2px; height: 21px; background: #007aff; vertical-align: -4px; margin-left: 1px; }
+      #search .cancel { position: absolute; right: 16px; top: 127px; font: 400 17px/20px 'Inter Kit', 'Inter'; color: #007aff; opacity: 0; }
+      #search .list { position: absolute; left: 0; right: 0; top: 168px; }
+      #search .sect { position: absolute; left: 20px; top: 168px; font: 700 21px/26px 'Inter Kit', 'Inter'; color: #000; opacity: 0; }
+      .row { position: absolute; left: 0; width: 402px; height: 78px; }
+      .row .av { position: absolute; left: 16px; top: 13px; width: 52px; height: 52px; border-radius: 50%;
+        background: linear-gradient(180deg, #a5abb8, #858b98); overflow: hidden; }
+      .row .av svg { position: absolute; left: 0; top: 0; }
+      .row .nm { position: absolute; left: 80px; top: 14px; font: 600 17px/21px 'Inter Kit', 'Inter'; color: #000; white-space: nowrap; }
+      .row .dt { position: absolute; right: 30px; top: 15px; font: 400 15px/19px 'Inter Kit', 'Inter'; color: #8a8a8e; }
+      .row .chev { position: absolute; right: 14px; top: 17px; }
+      .row .pv { position: absolute; left: 80px; right: 22px; top: 37px; font: 400 15px/20px 'Inter Kit', 'Inter'; color: #8a8a8e;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .row .pv b { color: #000; font-weight: 600; }
+      .row .sep { position: absolute; left: 80px; right: 0; bottom: 0; height: 0.5px; background: #d8d8dc; }
+      .row .hl { position: absolute; inset: 0; background: #d1d1d6; opacity: 0; }
+
+      /* overlays on the conversation (pt units) */
+      .badge { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: var(--orange);
+        color: #fff; font: 800 17px/30px 'Inter'; text-align: center; box-shadow: 0 3px 8px rgb(255 122 26 / 0.45); opacity: 0; }
+      .days { position: absolute; font: 700 12.5px/14px 'Inter'; color: var(--orange); white-space: nowrap; opacity: 0; }
+      .ring { position: absolute; border: 3px solid var(--orange); border-radius: 22px; opacity: 0; box-shadow: 0 0 0 4px rgb(255 122 26 / 0.18); }
+      .touch { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgb(60 60 67 / 0.28);
+        border: 2px solid rgb(255 255 255 / 0.75); box-shadow: 0 2px 10px rgb(0 0 0 / 0.2); opacity: 0; }
+
+      /* the landing page in Safari */
+      #web img { position: absolute; left: 0; top: 0; width: 402px; height: 874px; }
+      #web .press { position: absolute; border-radius: 40px; background: #000; opacity: 0; }
+
+      /* screenshot */
+      #flash { position: absolute; inset: 0; background: #fff; opacity: 0; z-index: 30; }
+      #thumb { position: absolute; left: 0; top: 0; width: 402px; height: 874px; transform-origin: 0 0; opacity: 0; z-index: 20; }
+      #thumb .frame { position: absolute; inset: -9px; border-radius: 30px; background: #fff; box-shadow: 0 18px 50px rgb(20 12 39 / 0.45); }
+      #thumb .scr { border-radius: 22px; }
+
+      /* cards */
+      .card { position: absolute; left: 64px; right: 64px; background: #fff; border-radius: 40px; box-shadow: 0 24px 70px rgb(20 12 39 / 0.32);
+        padding: 40px 46px 38px; opacity: 0; z-index: 15; }
+      .eyebrow { font: 700 30px/1 'Hind'; letter-spacing: 0.22em; color: var(--pink); text-transform: uppercase; }
+      #rules .item { display: flex; align-items: center; gap: 26px; margin-top: 30px; font: 750 48px/1.1 'Inter'; letter-spacing: -0.02em; color: #1a1430; }
+      #rules .item .ck { flex: none; width: 54px; height: 54px; border-radius: 50%; border: 4px solid #d9d6e3; position: relative; }
+      #rules .item .ck::after { content: ''; position: absolute; left: 15px; top: 7px; width: 13px; height: 25px; border: solid #fff;
+        border-width: 0 6px 6px 0; transform: rotate(45deg); opacity: 0; }
+      #rules .item.on .ck { background: var(--green); border-color: var(--green); }
+      #rules .item.on .ck::after { opacity: 1; }
+      #rules .law { margin-top: 34px; padding-top: 30px; border-top: 3px solid #eeecf4; font: 600 42px/1.2 'Inter'; color: #3a3352; opacity: 0; }
+      #rules .law b { color: #1a1430; font-weight: 800; }
+      #rules .law .usd { color: var(--orange); font-weight: 900; }
+      #rules .law small { display: block; margin-top: 14px; font: 500 27px/1.3 'Inter'; color: #6c6585; }
+
+      /* captions */
+      #cap { position: absolute; left: 0; right: 0; top: 0; height: 0; z-index: 40; }
+      #cap .c { position: absolute; left: 50%; top: 0; transform-origin: 50% 50%; white-space: nowrap; padding: 20px 38px 24px; border-radius: 30px;
+        background: rgb(20 12 39 / 0.9); color: #fff; font: 800 88px/1.04 'Inter'; letter-spacing: -0.035em; box-shadow: 0 14px 40px rgb(20 12 39 / 0.35); }
+      #cap .c .y { color: var(--yellow); }
+
+      #addr { position: absolute; left: 50%; top: 256px; width: 900px; height: 84px; padding: 0 40px; border-radius: 42px; z-index: 25; opacity: 0;
+        justify-content: center;
+        background: rgb(255 255 255 / 0.94); box-shadow: 0 10px 30px rgb(0 0 0 / 0.35); display: flex; align-items: center; gap: 16px;
+        font: 600 44px/1 'Inter Kit', 'Inter'; color: #000; letter-spacing: -0.01em; white-space: nowrap; }
+      #addr svg { flex: none; }
+      /* end card (the landing page's look) */
+      #end { position: absolute; inset: 0; opacity: 0; z-index: 50; background: radial-gradient(120% 70% at 20% 30%, #2b1d63 0%, #1d1440 45%, #140c27 100%); }
+      #end .pill { position: absolute; left: 50%; top: 285px; width: 470px; height: 140px; margin-left: -235px; border-radius: 34px; background: #fff;
+        display: grid; place-items: center; box-shadow: 0 18px 50px rgb(0 0 0 / 0.35); }
+      #end .pill img { width: 390px; }
+      #end .eb { position: absolute; left: 0; right: 0; top: 470px; text-align: center; font: 700 30px/1 'Hind'; letter-spacing: 0.26em; color: var(--pink); }
+      #end .h { position: absolute; left: 0; right: 0; top: 520px; text-align: center; font: 400 84px/1.08 'Archivo Black'; letter-spacing: -0.02em; color: #fff; }
+      #end .h span { display: block; }
+      #end .h .y { color: var(--yellow); display: inline; }
+      #end .sub { position: absolute; left: 100px; right: 100px; top: 730px; text-align: center; font: 500 40px/1.3 'Hind'; color: rgb(255 255 255 / 0.86); }
+      #end .cta { position: absolute; left: 50%; top: 880px; width: 640px; height: 128px; margin-left: -320px; border-radius: 64px; background: var(--pink);
+        box-shadow: 14px 14px 0 var(--yellow); display: grid; place-items: center; font: 400 54px/1 'Archivo Black'; color: var(--ink); letter-spacing: 0.01em; }
+      #end .chips { position: absolute; left: 0; right: 0; top: 1046px; text-align: center; font: 700 30px/1 'Hind'; letter-spacing: 0.2em; color: rgb(255 255 255 / 0.78); }
+      #end .yrs { position: absolute; left: 0; right: 0; top: 1090px; text-align: center; font: 600 34px/1.2 'Hind'; color: var(--yellow); opacity: 0; }
+      #end .fine { position: absolute; left: 110px; right: 110px; top: 1146px; text-align: center; font: 500 22px/1.32 'Hind'; color: rgb(255 255 255 / 0.62); }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div class="scr" id="search">
+        <iframe id="kitSearch"></iframe>
+        <div class="bg"></div>
+        <div class="title">Messages</div>
+        <div class="field">
+          <svg width="17" height="17" viewBox="0 0 17 17"><circle cx="7" cy="7" r="5.6" fill="none" stroke="#8a8a8e" stroke-width="2"/><path d="M11.2 11.2 L15.6 15.6" stroke="#8a8a8e" stroke-width="2.2" stroke-linecap="round"/></svg>
+          <div class="ph" id="ph">Search</div>
+        </div>
+        <div class="cancel" id="cancel">Cancel</div>
+        <div class="sect" id="sect">Messages</div>
+        <div class="list" id="list"></div>
+        <div class="ov" id="searchOv"><div class="touch" id="touchSearch"></div></div>
+      </div>
+      <div class="scr" id="convo">
+        <iframe id="kitConvo"></iframe>
+        <div class="ov" id="convoOv"><div class="ring" id="ring"></div></div>
+      </div>
+      <div class="scr" id="web">
+        <img src="assets/lp_stop.png" alt="" />
+        <div class="press" id="press"></div>
+        <div class="ov"><div class="touch" id="touchWeb"></div></div>
+      </div>
+      <div id="dim"></div>
+      <div id="flash"></div>
+      <div id="thumb"><div class="frame"></div><div class="scr" id="thumbScr"><iframe id="kitThumb"></iframe><div class="ov" id="thumbOv"></div></div></div>
+      <div class="card" id="rules">
+        <div class="eyebrow">What may qualify</div>
+        <div class="item"><div class="ck"></div><div>2+ marketing texts from a real company</div></div>
+        <div class="item"><div class="ck"></div><div>Sent weeks after your STOP</div></div>
+        <div class="item"><div class="ck"></div><div>Within the last 4 years</div></div>
+        <div class="law" id="law"></div>
+      </div>
+      <div id="addr"><svg width="26" height="34" viewBox="0 0 26 34"><rect x="2" y="14" width="22" height="18" rx="4" fill="#3c3c43"/><path d="M7 14V9a6 6 0 0 1 12 0v5" fill="none" stroke="#3c3c43" stroke-width="3.4"/></svg><span>spamclaims.com</span></div>
+      <div id="cap"></div>
+      <div id="end">
+        <div class="pill"><img src="../public/logo.png" alt="SpamClaims.com" /></div>
+        <div class="eb">SPAM TEXTS AFTER STOP</div>
+        <div class="h"><span>You said <span class="y">STOP.</span></span><span>They kept texting.</span></div>
+        <div class="sub">See if your screenshots may qualify<br />for attorney review.</div>
+        <div class="cta">spamclaims.com</div>
+        <div class="chips">FREE &nbsp;·&nbsp; NO SIGN-UP</div>
+        <div class="yrs" id="yrs">Texts from the last 4 years can count.</div>
+        <div class="fine" id="fine"></div>
+      </div>
+    </div>
+    <script>
+      const q = new URLSearchParams(location.search);
+      const EDIT = q.get('edit') || 'edit_a.json';
+      const KIT = '../../ios-ui-kit/ios.html';
+      const S = 1080 / 402, Y0 = -60;                       // the screen at full width; the status bar tucks under the top
+      const $ = (s) => document.querySelector(s);
+      const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+      const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+      const easeOut = (x) => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+      const win = (t, a, b) => smooth((t - a) / (b - a));
+      const backOut = (x, c = 1.7) => { const s = clamp(x) - 1; return 1 + (c + 1) * s * s * s + c * s * s; };
+      let E = null;
+
+      // ------------------------------------------------------------------ the thread (invented brand, fictional 555 number)
+      const NUMBER = '+1 (877) 555-0147';
+      const B = 'Lumalane';
+      const THREAD = [
+        { type: 'header', label: 'Text Message • SMS', time: 'Sat, May 3 at 10:12 AM' },
+        { type: 'in', text: `${B}: Your cart misses you! 25% off ends tonight. Reply STOP to opt out` },
+        { type: 'out', text: 'STOP' },
+        { type: 'in', text: `${B}: You've been unsubscribed. No more messages will be sent.` },
+        { type: 'time', day: 'Wed, May 21', time: '6:30 PM' },
+        { type: 'in', text: `${B}: Flash sale! 30% off everything this weekend` },
+        { type: 'time', day: 'Mon, Jun 9', time: '11:05 AM' },
+        { type: 'in', text: `${B}: We saved your faves. Come back for 20% off` },
+        { type: 'time', day: 'Fri, Jun 27', time: '9:14 AM' },
+        { type: 'in', text: `${B}: Summer drop is LIVE. Shop before it sells out` },
+        { type: 'time', day: 'Sat, Jul 12', time: '8:47 PM' },
+        { type: 'in', text: `${B}: Last chance! Free shipping ends tonight` },
+      ];
+      const AFTER = [5, 7, 9, 11];                    // the promos after the STOP (counted)
+      const DAYS = ['+18 days', '+37 days', '+55 days', '+70 days'];
+      const kitState = (n) => ({ statusTime: '9:41', battery: 0.82, signalBars: 4, compose: true, scroll: 0, screen: 'messages', mode: 'light',
+        header: { name: NUMBER }, items: THREAD.slice(0, n) });
+
+      const ROWS = [
+        { nm: NUMBER, dt: '5/3/26', pv: 'STOP', list: `${B}: Last chance! Free shipping ends tonight` },
+        { nm: '+1 (844) 555-0182', dt: '4/18/26', pv: 'STOP', list: 'PizzaPal: 2 large pizzas for $15 tonight only! Reply STOP to end' },
+        { nm: 'Mom', dt: '4/12/26', pv: null, list: 'Call me when you get a chance. Love you' },
+        { nm: '+1 (866) 555-0115', dt: '3/2/26', pv: '<b>Stop</b> texting me please', list: 'Your vehicle warranty is about to expire. Reply STOP to opt out' },
+        { nm: '+1 (833) 555-0129', dt: '1/29/26', pv: 'STOP', list: 'Congrats! You were pre-approved for a $5,000 loan. Reply STOP' },
+        { nm: 'Alex', dt: '1/22/26', pv: null, list: 'haha yes 7 works' },
+      ];
+      const PERSON = '<svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="20" r="9.5" fill="#fff"/><path d="M8 47c3-10 10-15 18-15s15 5 18 15" fill="#fff"/></svg>';
+      const CHEV = '<svg class="chev" width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" fill="none" stroke="#c4c4c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+      // ------------------------------------------------------------------ kit iframes
+      function loadKit(id, state) {
+        return new Promise((res) => {
+          const f = document.getElementById(id);
+          f.addEventListener('load', async () => {
+            const w = f.contentWindow;
+            await new Promise((r) => { const t = () => (w.__READY__ ? r() : setTimeout(t, 20)); t(); });
+            const kit = { f, w, n: -1, root: w.document.getElementById('screen'), boxes: [] };
+            setKit(kit, state);
+            res(kit);
+          }, { once: true });
+          f.src = KIT;
+        });
+      }
+      function setKit(kit, n) {
+        if (kit.n === n) return;
+        kit.n = n;
+        kit.w.IOSKit.render(kit.root, kitState(n));
+        const track = kit.root.querySelector('.ios-track');
+        kit.track = track;
+        // the layout positions (pt, unscrolled) of every bubble in item order
+        const bubbles = [...track.querySelectorAll('.ios-b')];
+        kit.bubbles = bubbles;
+        kit.boxes = bubbles.map((b) => ({ el: b, top: b.offsetTop, h: b.offsetHeight, left: b.offsetLeft, w: b.offsetWidth, side: b.dataset.side }));
+        // map item index -> bubble box
+        kit.item = {};
+        let k = 0;
+        THREAD.slice(0, n).forEach((it, i) => { if (it.type === 'in' || it.type === 'out') kit.item[i] = kit.boxes[k++]; });
+      }
+      function scrollKit(kit, y) { if (kit.track) kit.track.style.transform = `translateY(${(-y).toFixed(2)}px)`; }
+      function popBubble(kit, i, t0, sec) {          // a new bubble springs in from its tail corner
+        const bx = kit.item[i];
+        if (!bx) return;
+        const a = backOut((sec - t0) / 0.32, 1.5);
+        bx.el.style.transformOrigin = bx.side === 'out' ? '100% 100%' : '0% 100%';
+        bx.el.style.transform = sec - t0 < 0.4 ? `scale(${(0.4 + 0.6 * a).toFixed(4)})` : '';
+        bx.el.style.opacity = clamp((sec - t0) / 0.06).toFixed(3);
+      }
+
+      // ------------------------------------------------------------------ the search screen
+      function buildSearch() {
+        const list = $('#list');
+        ROWS.forEach((r, k) => {
+          const el = document.createElement('div');
+          el.className = 'row';
+          el.style.top = `${k * 78}px`;
+          el.innerHTML = `<div class="hl"></div><div class="av">${PERSON}</div><div class="nm">${r.nm}</div><div class="dt">${r.dt}</div>${CHEV}` +
+            `<div class="pv"></div><div class="sep"></div>`;
+          list.appendChild(el);
+          r.el = el;
+        });
+      }
+      function setSearch(sec) {
+        const s = E.search;
+        const focus = easeOut((sec - s.focus) / 0.28);
+        $('#search .title').style.transform = `translateY(${(-48 * focus).toFixed(2)}px)`;
+        $('#search .title').style.opacity = (1 - focus).toFixed(3);
+        const f = $('#search .field');
+        f.style.top = `${118 - 52 * focus}px`;
+        f.style.right = `${16 + 66 * focus}px`;
+        $('#cancel').style.opacity = focus.toFixed(3);
+        $('#cancel').style.top = `${127 - 52 * focus}px`;
+        const nTyped = s.typed.filter((t) => sec >= t).length;
+        const blink = Math.floor((sec - s.focus) * 2.2) % 2 === 0;
+        $('#ph').innerHTML = nTyped ? `<span class="typed">${'STOP'.slice(0, nTyped)}</span>${blink ? '<span class="caret"></span>' : ''}`
+          : (sec >= s.focus ? (blink ? '<span class="caret"></span>' : '') + '<span>Search</span>' : 'Search');
+        const res = sec >= s.results;
+        const listTop = res ? 205 - 52 * focus : 168 - 52 * focus;
+        $('#list').style.top = `${listTop}px`;
+        $('#sect').style.opacity = res ? 1 : 0;
+        $('#sect').style.top = `${168 - 52 * focus}px`;
+        let k = 0;
+        ROWS.forEach((r) => {
+          const show = res ? !!r.pv : true;
+          r.el.style.display = show ? 'block' : 'none';
+          if (!show) return;
+          r.el.style.top = `${k * 78}px`;
+          k++;
+          const pv = r.el.querySelector('.pv');
+          pv.innerHTML = res ? (r.pv === 'STOP' ? '<b>STOP</b>' : r.pv) : r.list;
+          r.el.style.opacity = res ? 1 : (1 - 0.65 * focus).toFixed(3);
+        });
+        // the tap on the first result
+        const c = E.count;
+        const tp = sec - c.tap;
+        const touch = $('#touchSearch');
+        touch.style.left = '200px';
+        touch.style.top = `${listTop + 40}px`;
+        touch.style.opacity = tp >= -0.05 && tp < 0.32 ? (1 - clamp((tp - 0.18) / 0.14)).toFixed(3) : '0';
+        touch.style.transform = `scale(${(0.7 + 0.3 * easeOut((tp + 0.05) / 0.12)).toFixed(3)})`;
+        ROWS[0].el.querySelector('.hl').style.opacity = tp >= 0 && tp < 0.45 ? '0.55' : '0';
+      }
+
+      // ------------------------------------------------------------------ screens and transitions
+      function place(el, x, y, s = S) { el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${s})`; }
+
+      function setScreens(sec) {
+        const h = E.hook, s = E.search, c = E.count, u = E.upload;
+        const back = easeOut((sec - s.back) / 0.38);            // convo -> list (iOS back: slide right)
+        const push = easeOut((sec - c.open) / 0.38);            // list -> convo (iOS push: slide in from the right)
+        const toWeb = easeOut((sec - u.web) / 0.4);             // Messages -> Safari (slide in from the right)
+        let convoX = 0, searchX = 0, dim = 0;
+        if (sec < c.open) {
+          convoX = 1080 * back;
+          searchX = -324 * (1 - back);
+          dim = 0.12 * (1 - back) * (sec >= s.back ? 1 : 0);
+        } else {
+          convoX = 1080 * (1 - push);
+          searchX = -324 * push;
+          dim = 0;
+        }
+        const webX = 1080 * (1 - toWeb);
+        const convoOut = -324 * toWeb;
+        place($('#search'), searchX, Y0);
+        place($('#convo'), (sec >= u.web ? convoOut : convoX), Y0);
+        place($('#web'), webX, Y0 + 72);
+        $('#search').style.visibility = sec >= s.back - 0.02 && sec < c.open + 0.45 ? 'visible' : 'hidden';
+        $('#web').style.visibility = sec >= u.web - 0.02 ? 'visible' : 'hidden';
+        $('#search').style.filter = `brightness(${(1 - dim).toFixed(3)})`;
+        $('#convo').style.zIndex = sec < c.open ? 2 : 3;
+        $('#search').style.zIndex = sec < c.open ? 1 : 2;
+        $('#web').style.zIndex = 4;
+        const ad = $('#addr');
+        const pop = backOut((sec - u.url) / 0.3, 2.2);
+        ad.style.opacity = (sec >= u.web ? clamp((sec - u.web - 0.15) / 0.15) * (1 - win(sec, E.endcard.at - 0.1, E.endcard.at + 0.1)) : 0).toFixed(3);
+        ad.style.transform = `translateX(calc(-50% + ${webX.toFixed(1)}px)) scale(${(sec >= u.url ? 0.92 + 0.08 * pop + 0.05 * Math.max(0, Math.sin(Math.PI * clamp((sec - u.url) / 0.35))) : 0.92).toFixed(4)})`;
+      }
+
+      // ------------------------------------------------------------------ the conversation over time
+      let KC = null, KT = null, KS = null;
+      function convoN(sec) {
+        const h = E.hook;
+        let n = 2;                                               // header + the first promo
+        if (sec >= h.stop_sent) n = 3;
+        if (sec >= h.confirm) n = 4;
+        h.arrivals.forEach((t) => { if (sec >= t) n += 2; });
+        return Math.min(n, THREAD.length);
+      }
+      function lastBottom(kit, n) {
+        let b = 0;
+        for (let i = 0; i < n; i++) if (kit.item[i]) b = Math.max(b, kit.item[i].top + kit.item[i].h + 8);
+        return b;
+      }
+      const VIEW_BOTTOM = 415;       // pt: the lowest content line, clear of the caption band and the Reels UI
+      function convoScroll(kit, sec) {
+        const h = E.hook, c = E.count;
+        if (sec < c.open) {
+          // follow the newest message (smoothly, like the app)
+          const n = convoN(sec);
+          const target = Math.max(0, lastBottom(kit, n) - VIEW_BOTTOM);
+          const prevN = convoN(sec - 0.22);
+          const prev = Math.max(0, lastBottom(kit, prevN) - VIEW_BOTTOM);
+          const tArr = [h.stop_sent, h.confirm, ...h.arrivals].filter((t) => t <= sec).pop() || 0;
+          const k = easeOut((sec - tArr) / 0.22);
+          return prev + (target - prev) * k;
+        }
+        // opened from search: the STOP near the top, then scroll down through the texts after it while counting
+        const stop = kit.item[2];
+        const startY = stop.top - 150;
+        const endY = Math.max(startY, kit.item[11].top + kit.item[11].h - VIEW_BOTTOM + 6);
+        const k = smooth((sec - (c.badges[0] - 0.35)) / (c.badges[3] - c.badges[0] + 0.45));
+        return startY + (endY - startY) * k;
+      }
+
+      function setConvo(sec) {
+        const n = convoN(sec);
+        setKit(KC, n);
+        const y = convoScroll(KC, sec);
+        scrollKit(KC, y);
+        const h = E.hook;
+        if (sec < E.count.open) {
+          popBubble(KC, 2, h.stop_sent, sec);
+          popBubble(KC, 3, h.confirm, sec);
+          h.arrivals.forEach((t, k) => popBubble(KC, AFTER[k], t, sec));
+        } else {
+          [2, 3, ...AFTER].forEach((i) => { const b = KC.item[i]; if (b) { b.el.style.transform = ''; b.el.style.opacity = 1; } });
+        }
+        drawEvidence($('#convoOv'), KC, y, sec, 'main');
+      }
+
+      // badges, day labels, the ring around STOP (in screen pt, following the scroll)
+      function drawEvidence(ov, kit, y, sec, tag) {
+        const c = E.count, r = E.rules;
+        const stop = kit.item[2];
+        const ring = ov.querySelector('.ring') || (() => { const d = document.createElement('div'); d.className = 'ring'; ov.appendChild(d); return d; })();
+        if (stop) {
+          const a = sec >= c.ring ? backOut((sec - c.ring) / 0.3) : 0;
+          ring.style.left = `${stop.left - 6}px`;
+          ring.style.top = `${stop.top - y - 6}px`;
+          ring.style.width = `${stop.w + 12}px`;
+          ring.style.height = `${stop.h + 12}px`;
+          ring.style.opacity = ((sec >= c.ring ? clamp((sec - c.ring) / 0.08) : 0) * clamp((stop.top - y - 118) / 40)).toFixed(3);
+          ring.style.transform = `scale(${(0.85 + 0.15 * a).toFixed(4)})`;
+        }
+        AFTER.forEach((i, k) => {
+          const b = kit.item[i];
+          let bd = ov.querySelector(`.badge[data-k="${k}"]`);
+          let dl = ov.querySelector(`.days[data-k="${k}"]`);
+          if (!bd) {
+            bd = document.createElement('div'); bd.className = 'badge'; bd.dataset.k = k; bd.textContent = String(k + 1); ov.appendChild(bd);
+            dl = document.createElement('div'); dl.className = 'days'; dl.dataset.k = k; dl.textContent = DAYS[k]; ov.appendChild(dl);
+          }
+          if (!b) { bd.style.opacity = 0; dl.style.opacity = 0; return; }
+          const t0 = c.badges[k];
+          const a = backOut((sec - t0) / 0.3, 2.2);
+          let pulse = 1;
+          if (r.each != null && sec > r.each) pulse = 1 + 0.25 * Math.max(0, Math.sin(Math.PI * clamp((sec - r.each - 0.12 * k) / 0.32)));
+          const cx = b.left + b.w + 22, cy = b.top - y + b.h / 2;
+          bd.style.left = `${cx}px`; bd.style.top = `${cy}px`;
+          const under = clamp((cy - 128) / 34);
+          bd.style.opacity = ((sec >= t0 ? clamp((sec - t0) / 0.06) : 0) * under).toFixed(3);
+          bd.style.transform = `scale(${((sec >= t0 ? 0.3 + 0.7 * a : 0.3) * pulse).toFixed(4)})`;
+          dl.style.left = `${cx + 20}px`; dl.style.top = `${cy - 7}px`;
+          dl.style.opacity = ((sec >= t0 + 0.08 ? clamp((sec - t0 - 0.08) / 0.15) : 0) * under).toFixed(3);
+        });
+      }
+
+      // ------------------------------------------------------------------ rules card (and the statute card in cut B)
+      function setRules(sec) {
+        const r = E.rules, u = E.upload;
+        const card = $('#rules');
+        const a = backOut((sec - r.in) / 0.42, 1.3);
+        const out = win(sec, u.shot - 0.02, u.shot + 0.04);        // gone under the screenshot flash
+        card.style.top = '290px';
+        card.style.opacity = (clamp((sec - r.in) / 0.12) * (1 - out)).toFixed(3);
+        card.style.transform = `translateY(${(60 * (1 - a) - 40 * out).toFixed(1)}px) scale(${(0.92 + 0.08 * a).toFixed(4)})`;
+        const items = card.querySelectorAll('.item');
+        const times = [r.items[0], r.items[1], r.items[2] + 0.55];
+        items.forEach((it, k) => {
+          const on = sec >= times[k];
+          it.classList.toggle('on', on);
+          const p = on ? backOut((sec - times[k]) / 0.28, 2.0) : 0;
+          it.querySelector('.ck').style.transform = `scale(${on ? (0.6 + 0.4 * p).toFixed(4) : 1})`;
+          it.style.opacity = on ? 1 : 0.38;
+        });
+        const law = $('#law');
+        const lawAt = E.cut === 'b' ? r.statute : r.items[2];
+        law.style.opacity = clamp((sec - lawAt) / 0.2).toFixed(3);
+        law.style.transform = `translateY(${(16 * (1 - easeOut((sec - lawAt) / 0.3))).toFixed(1)}px)`;
+        $('#dim').style.opacity = (0.42 * clamp((sec - r.in) / 0.3) * (1 - out)).toFixed(3);
+        if (E.cut === 'b') {
+          const usd = law.querySelector('.usd');
+          if (usd) usd.style.textShadow = sec >= r.dollars && sec < r.dollars + 0.6 ? '0 0 18px rgb(255 122 26 / 0.55)' : 'none';
+        }
+      }
+
+      // ------------------------------------------------------------------ screenshot, thumbnail, Safari
+      const THUMB = { x: 70, y: 470, s: S * 0.25 };
+      function setShot(sec) {
+        const u = E.upload;
+        const t = sec - u.shot;
+        $('#flash').style.opacity = t >= 0 && t < 0.3 ? (1 - t / 0.3).toFixed(3) : '0';
+        const th = $('#thumb');
+        if (t < 0) { th.style.opacity = 0; return; }
+        setKit(KT, THREAD.length);
+        const y = convoScroll(KT, Math.min(sec, u.shot));          // the copy holds the whole thread (frames render in any order)
+        scrollKit(KT, y);
+        drawEvidence($('#thumbOv'), KT, y, Math.min(sec, u.shot), 'thumb');
+        const k = backOut(t / 0.5, 1.2);
+        // from full screen to the thumbnail spot, then (after the tap on the landing page) into the button
+        let s = S + (THUMB.s - S) * k, x = 0 + (THUMB.x - 0) * k, yy = Y0 + (THUMB.y - Y0) * k, rot = -4 * clamp(t / 0.5);
+        const tc = sec - (u.web + 0.32);
+        if (tc > 0) {
+          const g = easeOut(tc / 0.45);
+          s = THUMB.s * (1 - 0.8 * g); x = THUMB.x + (450 - THUMB.x) * g; yy = THUMB.y + (1060 - THUMB.y) * g; rot = -4 + 4 * g;
+        }
+        th.style.opacity = (tc > 0.35 ? 1 - clamp((tc - 0.35) / 0.12) : 1).toFixed(3);
+        th.style.transform = `translate(${x.toFixed(1)}px, ${yy.toFixed(1)}px) rotate(${rot.toFixed(2)}deg) scale(${s.toFixed(4)})`;
+        $('#thumb .frame').style.opacity = clamp(t / 0.25).toFixed(3);
+      }
+      function setWeb(sec) {
+        const u = E.upload;
+        const tc = sec - u.tapcta;
+        // the button on the captured page (CSS px of the 402-wide page), from shoot_lp.cjs
+        const btn = window.LP_BTN || { x: 78.6, y: 386.8, w: 244.9, h: 65.9 };
+        const press = $('#press');
+        press.style.left = `${btn.x}px`; press.style.top = `${btn.y}px`; press.style.width = `${btn.w}px`; press.style.height = `${btn.h}px`;
+        press.style.opacity = tc >= 0 && tc < 0.4 ? (0.18 * (1 - clamp((tc - 0.2) / 0.2))).toFixed(3) : '0';
+        const touch = $('#touchWeb');
+        touch.style.left = `${btn.x + btn.w / 2}px`; touch.style.top = `${btn.y + btn.h / 2}px`;
+        touch.style.opacity = tc >= -0.05 && tc < 0.35 ? (1 - clamp((tc - 0.2) / 0.15)).toFixed(3) : '0';
+        touch.style.transform = `scale(${(0.7 + 0.3 * easeOut((tc + 0.05) / 0.12)).toFixed(3)})`;
+      }
+
+      // ------------------------------------------------------------------ captions
+      function setCaps(sec) {
+        const host = $('#cap');
+        const caps = E.captions;
+        const u = E.upload, c = E.count;
+        let cur = null;
+        for (const cp of caps) if (sec >= cp.at && sec < cp.until) cur = cp;
+        if (sec < (caps[0] ? caps[0].at : 0)) cur = caps[0];
+        if (sec >= E.endcard.at - 0.05 || sec >= E.upload.web + 0.12) cur = null;
+        // while the texts after STOP are being counted, the caption is the running count
+        let text = cur ? cur.text : '', hl = cur ? cur.hl : '';
+        const counted = c.badges.filter((t) => sec >= t).length;
+        if (cur && cur.text === 'Count what came after' && counted > 0) { text = `${counted} text${counted > 1 ? 's' : ''} after STOP`; hl = String(counted); }
+        if (!text) { host.innerHTML = ''; return; }
+        const key = text + '|' + hl;
+        if (host.dataset.key !== key) {
+          host.dataset.key = key;
+          host.dataset.at = String(cur.at);
+          const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+          let html = esc(text);
+          if (hl && text.includes(hl)) html = esc(text).replace(esc(hl), `<span class="y">${esc(hl)}</span>`);
+          host.innerHTML = `<div class="c">${html}</div>`;
+        }
+        const el = host.firstChild;
+        const t0 = parseFloat(host.dataset.at);
+        const popT = counted > 0 && text.endsWith('after STOP') ? c.badges[counted - 1] : t0;
+        const a = backOut((sec - popT) / 0.2, 1.8);
+        const y = 1150;
+        el.style.top = `${y}px`;
+        el.style.transform = `translate(-50%, -50%) scale(${(0.86 + 0.14 * a).toFixed(4)})`;
+      }
+
+      // ------------------------------------------------------------------ end card
+      function setEnd(sec) {
+        const ec = E.endcard;
+        const t = sec - ec.at;
+        const end = $('#end');
+        end.style.opacity = t >= 0 ? '1' : '0';                       // slides up over the landing page (no ghosted crossfade)
+        end.style.transform = `translateY(${(1920 * (1 - easeOut(t / 0.34))).toFixed(1)}px)`;
+        if (t < 0) return;
+        const p = backOut((t - 0.05) / 0.4, 1.6);
+        $('#end .pill').style.transform = `translateY(${(-30 * (1 - p)).toFixed(1)}px) scale(${(0.85 + 0.15 * p).toFixed(4)})`;
+        const hs = [...document.querySelectorAll('#end .h > span')];
+        hs.forEach((el, j) => {
+          const b = backOut((t - 0.12 - 0.12 * j) / 0.34, 1.5);
+          el.style.opacity = clamp((t - 0.12 - 0.12 * j) / 0.1).toFixed(3);
+          el.style.transform = `translateY(${(30 * (1 - b)).toFixed(1)}px)`;
+        });
+        $('#end .sub').style.opacity = clamp((t - 0.5) / 0.25).toFixed(3);
+        const cb = backOut((t - 0.62) / 0.36, 1.8);
+        $('#end .cta').style.opacity = clamp((t - 0.62) / 0.1).toFixed(3);
+        $('#end .cta').style.transform = `scale(${(0.7 + 0.3 * cb).toFixed(4)})`;
+        $('#end .chips').style.opacity = clamp((t - 0.8) / 0.25).toFixed(3);
+        $('#yrs').style.opacity = clamp((sec - ec.years + 0.1) / 0.25).toFixed(3);
+        $('#fine').style.opacity = clamp((t - 0.9) / 0.3).toFixed(3);
+      }
+
+      window.renderFrame = async (i) => {
+        const sec = i / E.fps;
+        setScreens(sec);
+        if (sec < E.upload.web + 0.5) setConvo(sec);
+        if (sec >= E.search.back - 0.05 && sec < E.count.open + 0.5) setSearch(sec);
+        setRules(sec);
+        setShot(sec);
+        if (sec >= E.upload.web - 0.05) setWeb(sec);
+        setCaps(sec);
+        setEnd(sec);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return true;
+      };
+
+      window.ready = (async () => {
+        E = await fetch(EDIT).then((r) => r.json());
+        try { window.LP_BTN = (await fetch('assets/lp_stop.json').then((r) => r.json())).buttons.find((b) => /check my texts/i.test(b.text)); } catch (e) {}
+        $('#law').innerHTML = E.cut === 'b'
+          ? 'Under federal law (the TCPA), damages can be <b>up to <span class="usd">$500</span> per text.*</b><small>*Statutory amount under 47 U.S.C. § 227, not a prediction of any recovery. Results vary.</small>'
+          : 'Federal law (the TCPA) <b>may entitle you to damages for each one.</b><small>Not every text qualifies. Eligibility depends on the facts.</small>';
+        $('#fine').textContent = E.cut === 'b'
+          ? '*Statutory damages under 47 U.S.C. § 227; not a prediction of any recovery. SpamClaims is not a law firm. Not legal advice. Eligibility depends on facts and location; time limits apply.'
+          : 'SpamClaims is not a law firm and does not give legal advice. Not every text qualifies; eligibility depends on facts and location. Time limits apply.';
+        buildSearch();
+        [KC, KT, KS] = await Promise.all([loadKit('kitConvo', 2), loadKit('kitThumb', THREAD.length), loadKit('kitSearch', 0)]);
+        // the search screen borrows the kit's status bar; everything below it is the search UI
+        await document.fonts.ready;
+        await Promise.all(['400 104px "Archivo Black"', '700 30px "Hind"', '500 42px "Hind"', '800 74px "Inter"'].map((f) => document.fonts.load(f)));
+        if (q.get('play') === '1') {
+          let i = 0;
+          const tick = async () => { await window.renderFrame(i); i = (i + 1) % E.frames; setTimeout(tick, 1000 / E.fps); };
+          tick();
+        }
+        return true;
+      })();
+    </script>
+  </body>
+</html>
