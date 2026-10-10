@@ -265,6 +265,9 @@ def sky_state(t, campos):
         pos[0] = lone
         scl[0] = (9.0 * pop * (1 - min(1.0, go / 1.2) * 0.6)) if t >= t_one else 0.0
         vis[0] = t >= t_one
+    v = pos - campos[None, :]
+    d = np.linalg.norm(v, axis=1)
+    pos = np.where((d < 4.0)[:, None], campos[None, :] + v / np.maximum(d, 1e-6)[:, None] * 4.0, pos)   # nothing fills the lens
     rot = sw.euler_facing(campos[None, :] - pos) + SKY_JIT * 0.6
     return pos, rot, np.repeat(scl[:, None], 3, axis=1)
 
@@ -640,7 +643,7 @@ scene.render.image_settings.color_mode = "RGB"
 scene.view_settings.view_transform = "Khronos PBR Neutral"
 scene.view_settings.exposure = float(args.get("exposure", "0.0"))
 scene.render.use_motion_blur = args.get("mblur", "1") == "1" and not PREVIEW
-scene.render.motion_blur_shutter = 0.1
+scene.render.motion_blur_shutter = float(args.get("shutter", "0.1"))
 scene.frame_start, scene.frame_end = 0, NF - 1
 
 
