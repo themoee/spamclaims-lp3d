@@ -1,0 +1,54 @@
+{
+  "dpr": 3,
+  "viewport": [
+    402,
+    874
+  ],
+  "boxes": [
+    {
+      "cls": "ios-lock-date",
+      "text": "Wednesday, October 8",
+      "x": 0,
+      "y": 86.08333587646484,
+      "w": 402,
+      "h": 20.401042938232422,
+      "lines": null
+    },
+    {
+      "cls": "ios-lock-clock",
+      "text": "2:13",
+      "x": 0,
+      "y": 92.91461181640625,
+      "w": 402,
+      "h": 164.72000122070312,
+      "lines": null
+    },
+    {
+      "cls": "ios-notif",
+      "text": "+1 (877) 555-01472h agoLumalane: We saved your faves. Come back for 20% off",
+      "x": 12,
+      "y": 666,
+      "w": 378,
+      "h": 86,
+      "lines": null
+    },
+    {
+      "cls": "ios-notif",
+      "text": "+1 (877) 555-01471m agoLumalane: Flash sale extended! 30% off until 3 AM",
+      "x": 12,
+      "y": 572,
+      "w": 378,
+      "h": 86,
+      "lines": null
+    },
+    {
+      "cls": "ios-notif",
+      "text": "+1 (877) 555-0147nowLumalane: Last chance! Free shipping ends tonight",
+      "x": 12,
+      "y": 478,
+      "w": 378,
+      "h": 86,
+      "lines": null
+    }
+  ]
+}

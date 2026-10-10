@@ -1,0 +1,155 @@
+<!doctype html>
+<!-- Ad 5 ("2:13 AM") compositor, 1080x1920: the post-processed Blender frames (ad5/out/post) with clean captions in the
+     top band (the phone's screen stays clear), the statute-anchored $500 card, the call to action and the end card.
+     capture5.cjs calls renderFrame(i). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SpamClaims Reel 5</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Hind:wght@400;500;600;700&display=block" />
+    <style>
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; src: url(../public/fonts/inter-latin-opsz-normal.woff2) format('woff2'); }
+      :root { --yellow: #ffe066; --pink: #ff5ca6; --ink: #140c27; }
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #frame { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #shade { position: absolute; left: 0; right: 0; top: 0; height: 820px; opacity: 0;
+        background: linear-gradient(180deg, rgb(4 3 10 / 0.72) 0%, rgb(4 3 10 / 0.5) 55%, rgb(4 3 10 / 0) 100%); }
+      .cap { position: absolute; left: 0; right: 0; top: 318px; text-align: center; color: #fff; font: 800 78px/1.05 'Inter';
+        letter-spacing: -0.035em; text-shadow: 0 2px 24px rgb(0 0 0 / 0.8), 0 1px 4px rgb(0 0 0 / 0.6); opacity: 0; }
+      .cap .y { color: var(--yellow); }
+      #money { position: absolute; left: 0; right: 0; top: 268px; text-align: center; opacity: 0; color: #fff; }
+      #money .up { font: 800 54px/1 'Inter'; letter-spacing: -0.02em; text-shadow: 0 2px 20px rgb(0 0 0 / 0.8); }
+      #money .usd { display: block; margin-top: 4px; font: 400 196px/0.95 'Archivo Black'; color: var(--yellow); letter-spacing: -0.02em;
+        text-shadow: 0 6px 40px rgb(0 0 0 / 0.75); }
+      #money .usd sup { font-size: 90px; vertical-align: 70px; margin-left: 4px; }
+      #money .per { display: block; margin-top: 2px; font: 800 58px/1 'Inter'; letter-spacing: -0.02em; text-shadow: 0 2px 20px rgb(0 0 0 / 0.8); }
+      #money .q { display: block; margin: 22px auto 0; width: 860px; font: 600 27px/1.32 'Hind'; color: rgb(255 255 255 / 0.9);
+        text-shadow: 0 2px 10px rgb(0 0 0 / 0.9); }
+      #end { position: absolute; inset: 0; opacity: 0; }
+      #end .logo { position: absolute; left: 50%; top: 286px; width: 520px; transform: translateX(-50%); filter: drop-shadow(0 6px 20px rgb(0 0 0 / 0.6)); }
+      #end .h { position: absolute; left: 0; right: 0; top: 452px; text-align: center; color: #fff; font: 400 70px/1.04 'Archivo Black';
+        text-shadow: 0 4px 24px rgb(0 0 0 / 0.7); }
+      #end .h .y { color: var(--yellow); }
+      #end .m { position: absolute; left: 0; right: 0; top: 612px; text-align: center; color: #fff; font: 800 44px/1 'Inter'; letter-spacing: -0.02em;
+        text-shadow: 0 2px 16px rgb(0 0 0 / 0.8); }
+      #end .m b { color: var(--yellow); font-weight: 900; }
+      #end .cta { position: absolute; left: 50%; top: 680px; width: 580px; height: 104px; margin-left: -290px; border-radius: 52px; background: var(--pink);
+        box-shadow: 11px 11px 0 var(--yellow), 0 14px 36px rgb(0 0 0 / 0.5); display: grid; place-items: center; font: 400 46px/1 'Archivo Black'; color: var(--ink); }
+      #end .fine { position: absolute; left: 110px; right: 110px; top: 816px; text-align: center; font: 500 21px/1.32 'Hind'; color: rgb(255 255 255 / 0.78);
+        text-shadow: 0 2px 8px rgb(0 0 0 / 0.95); }
+    </style>
+  </head>
+  <body>
+    <img id="frame" alt="" />
+    <div id="shade"></div>
+    <div id="caps"></div>
+    <div id="money">
+      <div class="up">Under federal law: up to</div>
+      <span class="usd">$500<sup>*</sup></span>
+      <span class="per">per text after your STOP</span>
+      <span class="q">*Statutory damages under the TCPA, 47 U.S.C. § 227. Results vary; not every text qualifies.</span>
+    </div>
+    <div id="end">
+      <img class="logo" src="../public/logo-reversed.png" alt="SpamClaims.com" />
+      <div class="h">You said <span class="y">STOP.</span><br />They kept texting.</div>
+      <div class="m">Each text after it: up to <b>$500*</b></div>
+      <div class="cta">spamclaims.com</div>
+      <div class="fine" id="fine"></div>
+    </div>
+    <script>
+      const q = new URLSearchParams(location.search);
+      const FRAMES = q.get('frames') || 'out/post';
+      const $ = (s) => document.querySelector(s);
+      const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+      const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+      const backOut = (x, c = 1.5) => { const s = clamp(x) - 1; return 1 + (c + 1) * s * s * s + c * s * s; };
+      let E = null, CAPS = [];
+
+      function build() {
+        const ev = E.events, v6 = E.voice.find((v) => v.line === 'V6');
+        CAPS = E.captions.concat([
+          { at: v6.at - 0.05, until: ev.web - 0.05, text: 'Screenshot your texts', hl: 'Screenshot' },
+          { at: ev.web - 0.05, until: ev.end - 0.05, text: 'Check them free at|SpamClaims.com', hl: 'SpamClaims.com' },
+        ]);
+        const host = $('#caps');
+        CAPS.forEach((c) => {
+          const el = document.createElement('div');
+          el.className = 'cap';
+          el.innerHTML = c.text.split('|').map((ln) => {
+            const esc = ln.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+            return c.hl && ln.includes(c.hl) ? esc.replace(c.hl, `<span class="y">${c.hl}</span>`) : esc;
+          }).join('<br/>');
+          host.appendChild(el);
+          c.el = el;
+        });
+        $('#fine').textContent = E.fine_print;
+      }
+
+      function setCaps(sec) {
+        let any = 0;
+        const ev = E.events;
+        CAPS.forEach((c) => {
+          const v = Math.min(smooth((sec - c.at) / 0.16), 1 - smooth((sec - c.until + 0.14) / 0.14));
+          const blocked = sec >= ev.money - 0.05 && sec < ev.shot;           // the money card owns the top band then
+          const vv = blocked ? 0 : v;
+          c.el.style.opacity = vv.toFixed(3);
+          c.el.style.transform = `translateY(${(12 * (1 - smooth((sec - c.at) / 0.25))).toFixed(1)}px)`;
+          any = Math.max(any, vv);
+        });
+        return any;
+      }
+
+      function setMoney(sec) {
+        const ev = E.events;
+        const a = smooth((sec - ev.money) / 0.2), b = 1 - smooth((sec - ev.shot + 0.1) / 0.25);
+        const v = Math.min(a, b);
+        $('#money').style.opacity = v.toFixed(3);
+        const p = backOut((sec - ev.money) / 0.45, 1.6);
+        $('#money .usd').style.transform = `scale(${(0.72 + 0.28 * p).toFixed(4)})`;
+        $('#money .q').style.opacity = clamp((sec - ev.money - 0.4) / 0.3).toFixed(3);          // the qualifier, on screen with the figure
+        return v;
+      }
+
+      function setEnd(sec) {
+        const t = sec - E.events.end - 0.4;                     // after the camera has started pulling back
+        $('#end').style.opacity = clamp(t / 0.35).toFixed(3);
+        const lp = backOut((t - 0.05) / 0.45);
+        $('#end .logo').style.transform = `translateX(-50%) translateY(${(-20 * (1 - lp)).toFixed(1)}px) scale(${(0.9 + 0.1 * lp).toFixed(4)})`;
+        $('#end .h').style.opacity = clamp((t - 0.2) / 0.3).toFixed(3);
+        $('#end .m').style.opacity = clamp((t - 0.45) / 0.3).toFixed(3);
+        const cp = backOut((t - 0.6) / 0.4, 1.8);
+        $('#end .cta').style.opacity = clamp((t - 0.6) / 0.12).toFixed(3);
+        $('#end .cta').style.transform = `scale(${(0.7 + 0.3 * cp).toFixed(4)})`;
+        $('#end .fine').style.opacity = clamp((t - 0.8) / 0.3).toFixed(3);
+        return clamp(t / 0.35);
+      }
+
+      const img = $('#frame');
+      window.renderFrame = async (i) => {
+        const sec = i / E.fps;
+        const src = `${FRAMES}/${String(i).padStart(4, '0')}.png`;
+        if (img.dataset.src !== src) {
+          img.dataset.src = src;
+          img.src = src;
+          await img.decode().catch(() => {});
+        }
+        const c = setCaps(sec), m = setMoney(sec), e = setEnd(sec);
+        $('#shade').style.opacity = Math.max(0.75 * c, m, e).toFixed(3);
+        $('#shade').style.background = e > 0 ? 'linear-gradient(180deg, rgb(4 3 10 / 0.9) 0%, rgb(4 3 10 / 0.82) 45%, rgb(4 3 10 / 0.5) 75%, rgb(4 3 10 / 0) 100%)' : '';
+        $('#shade').style.height = e > 0 ? '1000px' : '';
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return true;
+      };
+
+      window.ready = (async () => {
+        E = await fetch('edit.json').then((r) => r.json());
+        build();
+        await document.fonts.ready;
+        await Promise.all(['400 196px "Archivo Black"', '800 78px "Inter"', '600 27px "Hind"'].map((f) => document.fonts.load(f)));
+        return true;
+      })();
+    </script>
+  </body>
+</html>

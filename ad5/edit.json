@@ -1,0 +1,96 @@
+{
+ "fps": 24,
+ "duration": 23.704,
+ "frames": 569,
+ "events": {
+  "wake": 0.55,
+  "buzz": [
+   0.55,
+   2.75,
+   4.05
+  ],
+  "thread": 4.75,
+  "badges": [
+   6.784,
+   7.214,
+   7.471
+  ],
+  "evidence": 7.756,
+  "money": 11.341,
+  "vary": 13.65,
+  "shot": 16.5,
+  "web": 17.955,
+  "end": 20.404
+ },
+ "voice": [
+  {
+   "line": "V1",
+   "at": 1.3,
+   "dur": 1.234
+  },
+  {
+   "line": "V2",
+   "at": 3.05,
+   "dur": 1.043
+  },
+  {
+   "line": "V3",
+   "at": 5.65,
+   "dur": 3.164
+  },
+  {
+   "line": "V4",
+   "at": 9.25,
+   "dur": 4.059
+  },
+  {
+   "line": "V5",
+   "at": 13.65,
+   "dur": 2.565
+  },
+  {
+   "line": "V6",
+   "at": 16.75,
+   "dur": 3.504
+  }
+ ],
+ "captions": [
+  {
+   "at": 1.25,
+   "until": 3.0,
+   "text": "You said STOP.",
+   "hl": "STOP."
+  },
+  {
+   "at": 3.0,
+   "until": 5.550000000000001,
+   "text": "They kept texting.",
+   "hl": "texting."
+  },
+  {
+   "at": 5.6000000000000005,
+   "until": 6.684,
+   "text": "A real company?",
+   "hl": "real"
+  },
+  {
+   "at": 6.684,
+   "until": 7.706,
+   "text": "2+ texts",
+   "hl": "2+"
+  },
+  {
+   "at": 7.706,
+   "until": 9.15,
+   "text": "weeks after STOP?",
+   "hl": "weeks"
+  },
+  {
+   "at": 9.2,
+   "until": 11.290999999999999,
+   "text": "Under federal law,",
+   "hl": "federal law"
+  }
+ ],
+ "fine_print": "*Statutory damages under the TCPA, 47 U.S.C. \u00a7 227, per violating text. Not a guarantee; results vary; not every text qualifies. SpamClaims is not a law firm. Not legal advice."
+}

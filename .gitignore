@@ -30,3 +30,7 @@ ad3/audio/
 # Reel ad 4 build products (frames, audio, video): rebuilt by ad4/build4.py
 ad4/out/
 ad4/audio/
+
+# Reel ad 5 build products (frames, audio, video): rebuilt by ad5/build5.py
+ad5/out/
+ad5/audio/
