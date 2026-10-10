@@ -143,7 +143,7 @@ def place(x, at, gain=1.0, pan=0.0):
     mix[i:i + len(x), 1] += gain * r * x
 
 
-OVR_GAIN = {"ding": 0.45, "ding_again": 0.55, "freeze": 0.85, "storm": 0.8, "shutter": 0.6, "scan": 0.5, "pop": 0.9}
+OVR_GAIN = {"ding": 0.45, "ding_again": 0.6, "send": 0.6, "freeze": 0.62, "storm": 0.8, "shutter": 0.55, "scan": 0.32, "pop": 0.55}
 dings = 0
 for c in edit["cues"]:
     k, at = c["kind"], c["at"]

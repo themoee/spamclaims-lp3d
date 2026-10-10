@@ -44,6 +44,27 @@ VOICE = [  # (target start s, max length s, line) -- the voiceover, fitted to th
     (12.25, 2.65, "See if yours qualify. Free, at SpamClaims dot com."),
 ]
 
+# variant B, for the hook test: the money in the first three seconds, the law at the scan (same picture and sound)
+import sys  # noqa: E402
+
+VARIANT = dict(a.split("=", 1) for a in sys.argv[1:] if "=" in a).get("variant", "a")
+if VARIANT == "b":
+    CAPTIONS = [
+        (0.15, 3.00, ["Got texts after STOP?", "Each one could be worth", "up to $500*"], "money"),
+        (3.70, 5.62, ["You replied STOP."], "beat"),
+        (5.62, 6.68, ["They said you were", "unsubscribed."], "beat"),
+        (6.82, 9.36, ["17 days later,", "they texted again."], "beat"),
+        (9.48, 11.98, ["Texts after STOP may", "violate federal law."], "beat"),
+        (12.15, 15.00, ["See if your texts", "may qualify."], "end"),
+    ]
+    VOICE = [
+        (0.20, 3.40, "Got texts after you said stop? Each one could be worth up to five hundred dollars."),
+        (3.70, 2.95, "You replied stop. They said you were unsubscribed."),
+        (6.85, 2.45, "Seventeen days later... they texted again."),
+        (9.55, 2.35, "Texts after you opt out may violate federal law."),
+        (12.25, 2.65, "See if yours qualify. Free, at SpamClaims dot com."),
+    ]
+
 
 def ease(s, kind):
     if kind == "out":
@@ -108,7 +129,9 @@ out = {
     "voice": [{"at": a, "max": m, "text": x} for a, m, x in VOICE],
     "cues": cues,
 }
-json.dump(out, open(os.path.join(HERE, "edit.json"), "w", encoding="utf-8"), indent=1)
+out["variant"] = VARIANT
+json.dump(out, open(os.path.join(HERE, "edit.json" if VARIANT == "a" else f"edit_{VARIANT}.json"), "w",
+                    encoding="utf-8"), indent=1)
 print(f"{frames} frames, {len(cues)} sound cues")
 for c in cues:
     print(f"  {c['at']:6.2f}s {c['kind']}")

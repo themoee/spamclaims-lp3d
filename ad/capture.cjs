@@ -14,10 +14,11 @@ const frames = arg('frames', '../blender/frames/ad');
 const out = path.resolve(HERE, '..', arg('out', 'ad/out/frames'));
 const step = Number(arg('step', '1'));
 const only = arg('only', '') ? arg('only').split(',').map(Number) : null;
+const editFile = arg('edit', 'edit.json');
 
 (async () => {
   fs.mkdirSync(out, { recursive: true });
-  const edit = JSON.parse(fs.readFileSync(path.join(HERE, 'edit.json'), 'utf8'));
+  const edit = JSON.parse(fs.readFileSync(path.join(HERE, editFile), 'utf8'));
   const browser = await puppeteer.launch({
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     headless: true,
@@ -25,7 +26,7 @@ const only = arg('only', '') ? arg('only').split(',').map(Number) : null;
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
-  const url = 'file:///' + path.join(HERE, 'ad.html').replace(/\\/g, '/') + `?frames=${encodeURIComponent(frames)}`;
+  const url = 'file:///' + path.join(HERE, 'ad.html').replace(/\\/g, '/') + `?frames=${encodeURIComponent(frames)}&edit=${encodeURIComponent(editFile)}`;
   await page.goto(url, { waitUntil: 'load' });
   await page.evaluate(() => window.ready);
   const list = only || [...Array(edit.t.length).keys()].filter((i) => i % step === 0);

@@ -19,7 +19,9 @@ AUDIO = os.path.join(HERE, "audio")
 OUT = os.path.join(HERE, "out")
 SR = 48000
 args = dict(a.split("=", 1) for a in sys.argv[1:] if "=" in a)
-NAME = args.get("name", "spamclaims-reel-15s")
+VAR = args.get("variant", "a")
+TAG = "" if VAR == "a" else "_" + VAR
+NAME = args.get("name", f"spamclaims-reel-15s{TAG}")
 
 
 def read(path, channels=2):
@@ -50,13 +52,16 @@ def envelope(x, win=0.12):
 
 
 def main():
+    # captions follow the voice when its word timings exist (sync.py writes line_at into the edit file)
+    subprocess.run([sys.executable, os.path.join(HERE, "sync.py"), f"variant={VAR}"], check=False)
     if args.get("skip_capture") != "1":
-        subprocess.run(["node", os.path.join(HERE, "capture.cjs")], check=True, cwd=ROOT)
+        subprocess.run(["node", os.path.join(HERE, "capture.cjs"), "--edit", f"edit{TAG}.json", "--out", f"ad/out/frames{TAG}"],
+                       check=True, cwd=ROOT)
     subprocess.run([sys.executable, os.path.join(HERE, "sfx.py")], check=True)
 
     sfx = read(os.path.join(AUDIO, "sfx.wav"))
     n = len(sfx)
-    vo = fit(read(os.path.join(AUDIO, "vo.wav")), n)
+    vo = fit(read(os.path.join(AUDIO, f"vo{TAG}.wav")), n)
     music = read(os.path.join(AUDIO, "music.wav"))
     music = fit(music, n)
     e = envelope(vo)
@@ -64,9 +69,14 @@ def main():
     mix = (1.0 * vo
            + 0.62 * sfx * (1 - 0.35 * talk)
            + 0.30 * music * (1 - 0.65 * talk))
-    peak = np.max(np.abs(mix))
-    mix *= 0.89 / (peak + 1e-9)                                        # -1 dBFS peak
-    mixed = os.path.join(AUDIO, "mix.wav")
+    # loudness for social: bring the voiced parts to about -16 dBFS RMS, then a soft limiter holds peaks under -1 dBFS
+    voiced = talk[:, 0] > 0.5
+    rms = np.sqrt(np.mean(mix[voiced] ** 2)) if voiced.any() else np.sqrt(np.mean(mix ** 2))
+    mix *= 0.115 / (rms + 1e-9)
+    drive = 1.15
+    mix = np.tanh(mix * drive) / np.tanh(drive)
+    mix *= 0.89 / (np.max(np.abs(mix)) + 1e-9)
+    mixed = os.path.join(AUDIO, f"mix{TAG}.wav")
     with wave.open(mixed, "wb") as w:
         w.setnchannels(2)
         w.setsampwidth(2)
@@ -77,7 +87,7 @@ def main():
     dst = os.path.join(OUT, f"{NAME}.mp4")
     subprocess.run([
         "ffmpeg", "-y", "-loglevel", "error",
-        "-framerate", "30", "-i", os.path.join(OUT, "frames", "%04d.png"),
+        "-framerate", "30", "-i", os.path.join(OUT, f"frames{TAG}", "%04d.png"),
         "-i", mixed,
         "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p",
         "-r", "30", "-g", "30", "-c:a", "aac", "-b:a", "192k", "-ar", "48000",

@@ -35,9 +35,8 @@
       .cap.money .line { font-size: 76px; }
       .cap.money .line.hero { margin-top: 10px; display: flex; align-items: baseline; justify-content: center; gap: 22px; transform-origin: 50% 70%; }
       .cap.money .small { font-size: 68px; font-weight: 760; color: #e8ecf4; }
-      .cap.money .big { font-size: 206px; font-weight: 880; letter-spacing: -0.055em; line-height: 0.9;
-        background: linear-gradient(180deg, #ffd29a 0%, var(--orange) 45%, var(--orange-2) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
-        filter: drop-shadow(0 10px 40px rgb(245 130 32 / 0.45)); }
+      .cap.money .big { font-size: 206px; font-weight: 880; letter-spacing: -0.055em; line-height: 0.9; color: #ffa547;
+        text-shadow: 0 0 34px rgb(255 140 40 / 0.55), 0 8px 30px rgb(0 0 0 / 0.5); }
       .cap.money sup { font-size: 80px; font-weight: 800; color: var(--orange); align-self: flex-start; margin-left: -14px; }
       .end .fine { position: absolute; left: 110px; right: 110px; top: 862px; text-align: center; font-size: 25px; line-height: 1.35; color: #a6afc2; font-weight: 500; }
     </style>
@@ -103,7 +102,7 @@
           const host = c.style === 'end' ? endcap : caps.querySelector(`[data-k="${k}"]`);
           const lines = host.querySelectorAll('.line');
           lines.forEach((ln, j) => {
-            const tin = c.in + j * 0.22;                      // lines land one after another
+            const tin = c.line_at ? c.line_at[j] : c.in + j * 0.22;   // synced to the voice when timings exist
             const a = ease((sec - tin) / 0.28);
             const b = c.style === 'end' ? 1 : 1 - ease((sec - (c.out - 0.16)) / 0.16);
             const o = Math.min(a, b);
@@ -135,7 +134,7 @@
         return true;
       };
 
-      window.ready = fetch('edit.json').then((r) => r.json()).then(async (e) => {
+      window.ready = fetch(q.get('edit') || 'edit.json').then((r) => r.json()).then(async (e) => {
         edit = e;
         build();
         document.getElementById('fine').textContent = e.fine_print || '';

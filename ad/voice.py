@@ -118,45 +118,72 @@ def pick_voice():
 
 
 def tts(voice_id, text, speed=1.0):
+    """One line, with word timings (from the character alignment), leading silence trimmed off both."""
+    import base64
+
     body = {
         "text": text,
         "model_id": args.get("model", "eleven_multilingual_v2"),
         "voice_settings": {"stability": 0.42, "similarity_boost": 0.82, "style": 0.38, "use_speaker_boost": True, "speed": speed},
     }
-    raw = call(f"/v1/text-to-speech/{voice_id}?output_format=mp3_44100_128", body, accept="audio/mpeg")
-    return trim(mp3_to_np(raw))
+    d = json.loads(call(f"/v1/text-to-speech/{voice_id}/with-timestamps?output_format=mp3_44100_128", body))
+    x = mp3_to_np(base64.b64decode(d["audio_base64"]))
+    al = d.get("alignment") or d.get("normalized_alignment") or {}
+    words, cur, start, end = [], "", 0.0, 0.0
+    for ch, s, e in zip(al.get("characters", []), al.get("character_start_times_seconds", []),
+                        al.get("character_end_times_seconds", [])):
+        if ch.isspace():
+            if cur:
+                words.append((cur, start, end))
+            cur = ""
+            continue
+        if not cur:
+            start = s
+        cur, end = cur + ch, e
+    if cur:
+        words.append((cur, start, end))
+    idx = np.where(np.abs(x) > 0.01)[0]
+    a = max(0, idx[0] - int(0.02 * SR)) if len(idx) else 0
+    b = min(len(x), idx[-1] + int(0.08 * SR)) if len(idx) else len(x)
+    off = a / SR
+    return x[a:b], [(w, max(0.0, s - off), max(0.0, e - off)) for w, s, e in words]
 
 
 def main():
     os.makedirs(os.path.join(AUDIO, "vo_lines"), exist_ok=True)
-    edit = json.load(open(os.path.join(HERE, "edit.json"), encoding="utf-8"))
+    edit = json.load(open(os.path.join(HERE, args.get("edit", "edit.json")), encoding="utf-8"))
+    tag = "" if edit.get("variant", "a") == "a" else "_" + edit["variant"]
     v = pick_voice()
     print("voice:", v["name"], v["voice_id"])
     track = np.zeros(int(edit["duration"] * SR) + SR, dtype=np.float32)
     report = []
     for k, line in enumerate(edit["voice"]):
-        x = tts(v["voice_id"], line["text"])
+        x, words = tts(v["voice_id"], line["text"])
         dur = len(x) / SR
         if dur > line["max"]:                                 # ask for a slightly faster read first
-            x = tts(v["voice_id"], line["text"], speed=min(1.15, dur / line["max"] * 1.02))
+            x, words = tts(v["voice_id"], line["text"], speed=min(1.15, dur / line["max"] * 1.02))
             dur = len(x) / SR
-        if dur > line["max"]:                                 # then a gentle time-stretch
-            x = atempo(x, min(1.15, dur / line["max"]))
+        if dur > line["max"]:                                 # then a gentle time-stretch (timings scale with it)
+            f = min(1.15, dur / line["max"])
+            x = atempo(x, f)
+            words = [(w, s / f, e / f) for w, s, e in words]
             dur = len(x) / SR
-        write_wav(os.path.join(AUDIO, "vo_lines", f"{k}.wav"), x)
+        write_wav(os.path.join(AUDIO, "vo_lines", f"{k}{tag}.wav"), x)
         i = int(line["at"] * SR)
         track[i:i + len(x)] += x[: len(track) - i]
-        report.append((line["at"], round(dur, 2), line["max"], line["text"]))
+        report.append({"at": line["at"], "dur": round(dur, 3), "max": line["max"], "text": line["text"],
+                       "words": [{"w": w, "s": round(line["at"] + s, 3), "e": round(line["at"] + e, 3)} for w, s, e in words]})
     track = track[: int(edit["duration"] * SR)]
     track *= 0.89 / (np.max(np.abs(track)) + 1e-9)
-    write_wav(os.path.join(AUDIO, "vo.wav"), track)
+    write_wav(os.path.join(AUDIO, f"vo{tag}.wav"), track)
     json.dump({"voice": v["name"], "voice_id": v["voice_id"], "lines": report},
-              open(os.path.join(AUDIO, "vo.json"), "w"), indent=1)
+              open(os.path.join(AUDIO, f"vo{tag}.json"), "w"), indent=1)
     for r in report:
-        print(f"  at {r[0]:5.2f}s  {r[1]:4.2f}s (max {r[2]})  {r[3]}")
+        print(f"  at {r['at']:5.2f}s  {r['dur']:4.2f}s (max {r['max']})  {r['text']}")
 
     if args.get("sfx") == "1":
         prompts = {
+            "send": "a quick soft whoosh of a text message being sent, airy, short, modern",
             "ding": "a single soft modern phone notification ping, glassy, short, clean, no melody",
             "freeze": "a deep cinematic impact with an icy crystalline shimmer tail, time freezing, 1.5 seconds",
             "storm": "a tense low rumble swelling louder with fast fluttering whooshes, building anxiety, 2 seconds",
@@ -164,7 +191,7 @@ def main():
             "scan": "a futuristic scanner sweep, smooth rising electronic tone with soft static, 1.2 seconds",
             "pop": "a satisfying deep logo reveal hit with a bright warm shimmer, 2 seconds",
         }
-        lengths = {"ding": 0.6, "freeze": 1.6, "storm": 2.0, "shutter": 0.4, "scan": 1.2, "pop": 2.0}
+        lengths = {"send": 0.5, "ding": 0.6, "freeze": 1.6, "storm": 2.0, "shutter": 0.5, "scan": 1.2, "pop": 2.0}
         for kind, prompt in prompts.items():
             try:
                 raw = call("/v1/sound-generation?output_format=mp3_44100_128",
@@ -186,7 +213,16 @@ def main():
             write_wav(os.path.join(AUDIO, "music.wav"), mp3_to_np(raw))
             print("  music bed")
         except ApiError as e:
-            print("  music skipped:", e)
+            print("  music API unavailable, using a sound-effects bed instead:", str(e)[:120])
+            try:
+                raw = call("/v1/sound-generation?output_format=mp3_44100_128", {
+                    "text": "tense minimal modern electronic pulse bed, soft synth bass throb and light ticking, dark, "
+                            "building suspense, no melody, steady, 15 seconds",
+                    "duration_seconds": min(22.0, edit["duration"]), "prompt_influence": 0.45}, accept="audio/mpeg")
+                write_wav(os.path.join(AUDIO, "music.wav"), mp3_to_np(raw))
+                print("  bed from sound effects")
+            except ApiError as e2:
+                print("  bed skipped:", e2)
 
 
 if __name__ == "__main__":
