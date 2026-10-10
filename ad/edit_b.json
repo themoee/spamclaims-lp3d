@@ -518,17 +518,18 @@
  "captions": [
   {
    "in": 0.15,
-   "out": 3.0,
+   "out": 3.58,
    "lines": [
     "Got texts after STOP?",
     "Each one could be worth",
     "up to $500*"
    ],
    "style": "money",
+   "cascade": 0.34,
    "line_at": [
     0.1,
-    1.738,
-    2.516
+    0.44,
+    0.78
    ]
   },
   {
@@ -544,7 +545,7 @@
   },
   {
    "in": 4.778,
-   "out": 6.68,
+   "out": 6.73,
    "lines": [
     "They said you were",
     "unsubscribed."
@@ -557,7 +558,7 @@
   },
   {
    "in": 6.75,
-   "out": 9.36,
+   "out": 9.43,
    "lines": [
     "17 days later,",
     "they texted again."
@@ -570,7 +571,7 @@
   },
   {
    "in": 9.45,
-   "out": 11.98,
+   "out": 12.13,
    "lines": [
     "Texts after STOP may",
     "violate federal law."

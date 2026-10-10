@@ -518,7 +518,7 @@
  "captions": [
   {
    "in": 0.15,
-   "out": 3.0,
+   "out": 3.58,
    "lines": [
     "Still getting spam texts",
     "after you said STOP?"
@@ -542,7 +542,7 @@
   },
   {
    "in": 4.991,
-   "out": 6.68,
+   "out": 6.73,
    "lines": [
     "They said you were",
     "unsubscribed."
@@ -555,7 +555,7 @@
   },
   {
    "in": 6.75,
-   "out": 9.36,
+   "out": 9.38,
    "lines": [
     "17 days later,",
     "they texted again."
@@ -568,7 +568,7 @@
   },
   {
    "in": 9.4,
-   "out": 11.98,
+   "out": 12.13,
    "lines": [
     "Each text after STOP",
     "could be worth",

@@ -43,8 +43,16 @@ for k in range(1, len(caps)):
     if h is not None and h < caps[k]["in"]:
         caps[k]["in"] = round(h, 3)
         caps[k - 1]["out"] = round(min(caps[k - 1]["out"], h), 3)
+# ...and a caption holds until the next one starts (the voice may still be saying it, e.g. "five hundred dollars")
+for k in range(1, len(caps)):
+    gap = caps[k]["in"] - caps[k - 1]["out"]
+    if 0 < gap < 1.0:
+        caps[k - 1]["out"] = round(caps[k]["in"] - 0.02, 3)
 
 for c in edit["captions"]:
+    if c.get("cascade"):                     # shown fast on purpose (sound-off viewers must see it in the first second)
+        c["line_at"] = [round(c["in"] - 0.05 + j * c["cascade"], 3) for j in range(len(c["lines"]))]
+        continue
     times = []
     for j, line in enumerate(c["lines"]):
         hit = None

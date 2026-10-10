@@ -50,7 +50,7 @@ import sys  # noqa: E402
 VARIANT = dict(a.split("=", 1) for a in sys.argv[1:] if "=" in a).get("variant", "a")
 if VARIANT == "b":
     CAPTIONS = [
-        (0.15, 3.00, ["Got texts after STOP?", "Each one could be worth", "up to $500*"], "money"),
+        (0.15, 3.00, ["Got texts after STOP?", "Each one could be worth", "up to $500*"], "money", {"cascade": 0.34}),
         (3.70, 5.62, ["You replied STOP."], "beat"),
         (5.62, 6.68, ["They said you were", "unsubscribed."], "beat"),
         (6.82, 9.36, ["17 days later,", "they texted again."], "beat"),
@@ -124,7 +124,8 @@ t = [round(story_t(i / FPS), 6) for i in range(frames)]
 out = {
     "fps": FPS, "duration": DUR, "size": [1080, 1920], "t": t,
     "shots": [dict(zip(("a", "b", "t0", "t1", "ease"), s)) for s in SHOTS],
-    "captions": [{"in": a, "out": b, "lines": l, "style": s} for a, b, l, s in CAPTIONS],
+    "captions": [dict({"in": c[0], "out": c[1], "lines": c[2], "style": c[3]}, **(c[4] if len(c) > 4 else {}))
+                 for c in CAPTIONS],
     "fine_print": FINE_PRINT,
     "voice": [{"at": a, "max": m, "text": x} for a, m, x in VOICE],
     "cues": cues,
