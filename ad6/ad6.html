@@ -1,0 +1,590 @@
+<!doctype html>
+<!-- Ad 6 ("Storytime") compositor, 1080x1920. The 3D shots of Dre (blender/frames/ad6, by global frame), the iOS kit
+     live in iframes (the Kixrush thread, the group chat, the thread again for the screenshot), a search screen, the
+     federal law card with a marker sweep, the $500 slam, "the catch" checklist, the landing page, Gen Z stickers,
+     word-by-word captions and the end card. capture6.cjs calls renderFrame(i); every frame is a function of time. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SpamClaims Reel 6</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Hind:wght@500;600;700&family=Noto+Color+Emoji&display=block" />
+    <style>
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; src: url(../public/fonts/inter-latin-opsz-normal.woff2) format('woff2'); }
+      :root { --yellow: #ffe066; --pink: #ff5ca6; --ink: #140c27; --red: #ff3b3b; }
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; transform-origin: 50% 45%; }
+      .layer { position: absolute; inset: 0; visibility: hidden; }
+      #f3d { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #bg2d { position: absolute; left: -90px; top: -160px; width: 1260px; height: 2240px; filter: blur(34px) brightness(0.42) saturate(1.25); }
+      .phone { position: absolute; left: 88px; top: 232px; width: 904px; height: 1760px; border-radius: 64px; overflow: hidden;
+        background: #000; box-shadow: 0 30px 90px rgb(0 0 0 / 0.65), 0 0 0 2px rgb(255 255 255 / 0.09); }
+      .phone iframe { position: absolute; left: 0; top: 0; width: 402px; height: 874px; border: 0; transform-origin: 0 0; transform: scale(2.2488); }
+      .phone .ov { position: absolute; left: 0; top: 0; width: 402px; height: 874px; transform-origin: 0 0; transform: scale(2.2488); pointer-events: none; }
+      #stopRing { position: absolute; overflow: visible; }
+      /* search */
+      #search .ui { position: absolute; inset: 0; background: #fff; }
+      #search .field { position: absolute; left: 16px; right: 16px; top: 64px; height: 44px; border-radius: 22px; background: #eeeef0; }
+      #search .field svg { position: absolute; left: 13px; top: 13px; }
+      #search .q { position: absolute; left: 40px; top: 12px; font: 400 17px/20px 'Inter'; color: #111; white-space: pre; }
+      #search .caret { display: inline-block; width: 2px; height: 20px; background: #007aff; vertical-align: -4px; margin-left: 1px; }
+      #search .res { position: absolute; left: 20px; right: 20px; font-family: 'Inter'; opacity: 0; }
+      #search .res .u { font: 500 12px/1 'Inter'; color: #6b6b72; }
+      #search .res .t { margin-top: 5px; font: 600 17px/1.25 'Inter'; color: #1a0dab; }
+      #search .res .s { margin-top: 5px; font: 400 14px/1.35 'Inter'; color: #3c3c43; }
+      #search .res .s b { background: #fff1a6; font-weight: 600; }
+      #search .tap { position: absolute; width: 60px; height: 60px; margin: -30px; border-radius: 50%; background: rgb(0 0 0 / 0.18); opacity: 0; }
+      /* the federal law card */
+      #statute .card { position: absolute; left: 60px; top: 360px; width: 960px; transform-origin: 50% 80%; }
+      #statute .card img { width: 960px; display: block; border-radius: 33px; box-shadow: 0 34px 90px rgb(0 0 0 / 0.6); }
+      #statute .hl { position: absolute; background: var(--yellow); mix-blend-mode: multiply; border-radius: 6px; width: 0; }
+      .stamp { position: absolute; padding: 14px 30px 12px; border-radius: 20px; font: 400 54px/1 'Archivo Black'; letter-spacing: 0.01em;
+        white-space: nowrap; opacity: 0; }
+      /* the $500 */
+      #money { background: radial-gradient(120% 80% at 50% 42%, #3a1670 0%, #1a0a35 45%, #07030f 100%); }
+      #money .rays { position: absolute; left: -500px; top: -380px; width: 2080px; height: 2080px; border-radius: 50%; opacity: 0;
+        background: repeating-conic-gradient(from 0deg, rgb(255 224 102 / 0.22) 0deg 6deg, transparent 6deg 18deg);
+        -webkit-mask: radial-gradient(circle, #000 0%, #000 22%, transparent 62%); mask: radial-gradient(circle, #000 0%, #000 22%, transparent 62%); }
+      #money .up { position: absolute; left: 0; right: 0; top: 470px; text-align: center; font: 900 72px/1 'Inter'; color: #fff; letter-spacing: -0.02em; }
+      #money .usd { position: absolute; left: 0; right: 0; top: 560px; text-align: center; font: 400 330px/1 'Archivo Black'; letter-spacing: -0.03em; }
+      #money .usd span { background: linear-gradient(180deg, #fffbe0 0%, #ffe066 34%, #ffb300 62%, #fff0a0 78%, #ffc93a 100%);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        filter: drop-shadow(0 4px 0 #b06d00) drop-shadow(0 6px 0 #8a5200) drop-shadow(0 8px 0 #6b3d00) drop-shadow(0 0 60px rgb(255 200 60 / 0.55)); }
+      #money .usd sup { font-size: 140px; vertical-align: 150px; color: var(--yellow); -webkit-text-fill-color: var(--yellow); }
+      #money .per { position: absolute; left: 0; right: 0; top: 930px; text-align: center; font: 900 66px/1.08 'Inter'; color: #fff; letter-spacing: -0.02em; }
+      #money .per b { color: var(--yellow); }
+      #money .q { position: absolute; left: 110px; right: 110px; top: 1110px; text-align: center; font: 600 28px/1.35 'Hind'; color: rgb(255 255 255 / 0.82); }
+      #spark { position: absolute; inset: 0; }
+      /* the catch */
+      #catch .card { position: absolute; left: 60px; right: 60px; top: 290px; padding: 46px 52px 44px; border-radius: 46px;
+        background: rgb(16 9 32 / 0.82); box-shadow: 0 30px 90px rgb(0 0 0 / 0.55), inset 0 0 0 2px rgb(255 255 255 / 0.1); }
+      #catch .h { font: 400 70px/1 'Archivo Black'; color: #fff; }
+      #catch .h span { color: var(--yellow); }
+      #catch .row { display: flex; align-items: center; gap: 26px; margin-top: 30px; opacity: 0; }
+      #catch .ck { flex: none; width: 70px; height: 70px; border-radius: 50%; background: var(--yellow); display: grid; place-items: center; }
+      #catch .row .t { font: 800 50px/1.06 'Inter'; color: #fff; letter-spacing: -0.02em; }
+      #catch .rule { height: 3px; background: rgb(255 255 255 / 0.14); margin: 34px 0 24px; }
+      #catch .two { font: 800 42px/1.2 'Inter'; color: #fff; opacity: 0; letter-spacing: -0.01em; margin-bottom: 10px; }
+      #mine { position: absolute; left: 470px; top: 1050px; width: 540px; opacity: 0; transform-origin: 50% 50%; }
+      #mine .ts { font: 500 26px/1 'Inter'; color: #9a9aa2; text-align: left; margin: 0 0 10px 18px; }
+      #mine .ts b { font-weight: 700; }
+      #mine .bub { display: inline-block; padding: 18px 26px; border-radius: 34px; background: #262628; color: #fff; font: 400 34px/1.25 'Inter';
+        box-shadow: 0 14px 40px rgb(0 0 0 / 0.6); }
+      #mine .ring { position: absolute; left: -6px; top: -14px; width: 230px; height: 66px; overflow: visible; }
+      #mine .tag { position: absolute; right: 10px; top: -70px; padding: 12px 24px 10px; border-radius: 999px; background: #ff3b3b; color: #fff;
+        font: 400 40px/1 'Archivo Black'; transform: rotate(-5deg); box-shadow: 0 10px 30px rgb(0 0 0 / 0.5); }
+      #catch .vary { font: 700 40px/1.3 'Inter'; color: rgb(255 255 255 / 0.78); opacity: 0; }
+      #catch .each { margin-top: 26px; font: 800 50px/1.1 'Inter'; color: var(--yellow); opacity: 0; letter-spacing: -0.02em; }
+      #catch .fp { margin-top: 16px; font: 500 22px/1.35 'Hind'; color: rgb(255 255 255 / 0.62); opacity: 0; }
+      /* the landing page in the phone */
+      #lp { position: absolute; left: 0; top: 0; width: 402px; height: 874px; opacity: 0; }
+      #cta .phone { transform-origin: 50% 0; transform: scale(0.8); }
+      #lp img { width: 402px; height: 874px; display: block; }
+      #lp .addr { position: absolute; left: 24px; right: 24px; top: 816px; height: 44px; border-radius: 22px; background: rgb(42 34 66 / 0.94);
+        font: 500 16px/44px 'Inter'; color: #fff; text-align: center; }
+      #thumb { position: absolute; left: 22px; width: 104px; height: 226px; border-radius: 14px; overflow: hidden; opacity: 0;
+        box-shadow: 0 8px 24px rgb(0 0 0 / 0.6), 0 0 0 1.5px rgb(255 255 255 / 0.5); }
+      #thumb img { width: 100%; height: 100%; display: block; }
+      #shotFlash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+      #tapLp { position: absolute; width: 54px; height: 54px; margin: -27px; border-radius: 50%; background: rgb(255 255 255 / 0.55); opacity: 0; }
+      /* overlays */
+      #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(0 0 0 / 0.42) 100%); }
+      #grain { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; opacity: 0.07; mix-blend-mode: overlay; pointer-events: none; }
+      #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+      .sticker { position: absolute; opacity: 0; white-space: nowrap; transform-origin: 50% 50%; }
+      .pill { padding: 16px 32px 14px; border-radius: 999px; font: 400 48px/1 'Archivo Black'; box-shadow: 0 10px 30px rgb(0 0 0 / 0.45); }
+      .emo { font-family: 'Noto Color Emoji'; font-weight: 400; }
+      #caps { position: absolute; left: 60px; right: 60px; top: 1112px; height: 200px; pointer-events: none; }
+      .cap { position: absolute; left: 0; right: 0; top: 0; text-align: center; font: 900 78px/1.06 'Inter'; letter-spacing: -0.02em; word-spacing: 0.14em; color: #fff; opacity: 0;
+        text-shadow: 0 0 2px #000, 4px 0 0 #000, -4px 0 0 #000, 0 4px 0 #000, 0 -4px 0 #000, 3px 3px 0 #000, -3px 3px 0 #000, 3px -3px 0 #000,
+          -3px -3px 0 #000, 0 8px 24px rgb(0 0 0 / 0.65); }
+      .cap .w { display: inline-block; transition: none; }
+      .cap .y { color: var(--yellow); }
+      #end { position: absolute; inset: 0; opacity: 0; }
+      #end .shade { position: absolute; left: 0; right: 0; top: 0; height: 1300px;
+        background: linear-gradient(180deg, rgb(8 4 18 / 0.88) 0%, rgb(8 4 18 / 0.8) 55%, rgb(8 4 18 / 0.35) 85%, rgb(8 4 18 / 0) 100%); }
+      #end .logo { position: absolute; left: 50%; top: 286px; width: 460px; transform: translateX(-50%); filter: drop-shadow(0 6px 20px rgb(0 0 0 / 0.6)); }
+      #end .h { position: absolute; left: 0; right: 0; top: 440px; text-align: center; color: #fff; font: 400 72px/1.04 'Archivo Black'; }
+      #end .h .y { color: var(--yellow); }
+      #end .m { position: absolute; left: 0; right: 0; top: 700px; text-align: center; color: #fff; font: 800 46px/1 'Inter'; letter-spacing: -0.02em; }
+      #end .m b { color: var(--yellow); font-weight: 900; }
+      #end .cta { position: absolute; left: 50%; top: 776px; width: 600px; height: 108px; margin-left: -300px; border-radius: 54px; background: var(--pink);
+        box-shadow: 11px 11px 0 var(--yellow), 0 14px 36px rgb(0 0 0 / 0.5); display: grid; place-items: center; font: 400 48px/1 'Archivo Black'; color: var(--ink); }
+      #end .fine { position: absolute; left: 100px; right: 100px; top: 922px; text-align: center; font: 500 21px/1.34 'Hind'; color: rgb(255 255 255 / 0.76);
+        text-shadow: 0 2px 8px rgb(0 0 0 / 0.95); }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <img id="f3d" alt="" />
+      <div class="layer" id="l2d">
+        <img id="bg2d" alt="" />
+        <div class="layer" id="thread"><div class="phone"><iframe id="kitThread"></iframe>
+          <div class="ov"><svg id="stopRing" viewBox="0 0 100 50" preserveAspectRatio="none"><path id="ringPath" d="M6 27 C 4 8, 92 4, 95 24 C 98 44, 10 48, 5 30 C 3 22, 20 10, 40 9" fill="none" stroke="#ff3b3b" stroke-width="3.2" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></div></div></div>
+        <div class="layer" id="search"><div class="phone"><div class="ov" style="pointer-events:none">
+          <div class="ui"></div>
+          <div class="field"><svg width="17" height="17" viewBox="0 0 17 17"><circle cx="7" cy="7" r="5.6" fill="none" stroke="#8a8a8e" stroke-width="2"/><path d="M11.3 11.3l4.4 4.4" stroke="#8a8a8e" stroke-width="2" stroke-linecap="round"/></svg><div class="q"></div></div>
+          <div class="res" style="top:132px"><div class="u">Federal law · 47 U.S. Code § 227</div><div class="t">Restrictions on use of telephone equipment (TCPA)</div>
+            <div class="s">… may … bring … an action … <b>to receive up to $500 in damages for each such violation</b> …</div></div>
+          <div class="res" style="top:252px"><div class="u">Explainer</div><div class="t">Texts after you reply STOP: what the TCPA says</div>
+            <div class="s">Companies have to honor an opt-out. Texts that keep coming after it can be a violation…</div></div>
+          <div class="res" style="top:356px"><div class="u">Forum</div><div class="t">I said STOP and they kept texting. Is that legal?</div>
+            <div class="s">Short answer: often no. Screenshot everything…</div></div>
+          <div class="tap"></div>
+        </div></div></div>
+        <div class="layer" id="statute"><div class="card"><img src="assets/statute.png" alt="" /><div class="hl" id="hl0"></div><div class="hl" id="hl1"></div></div>
+          <div class="stamp" id="fedStamp" style="left:610px; top:300px; background:#ff3b3b; color:#fff; box-shadow: 0 12px 30px rgb(0 0 0 / 0.5)">FEDERAL LAW <span class="emo">✅</span></div></div>
+        <div class="layer" id="chat"><div class="phone"><iframe id="kitChat"></iframe></div></div>
+        <div class="layer" id="catch"><div class="card">
+          <div class="h">what can count <span class="emo">👇</span></div>
+          <div class="row" id="c1"><div class="ck"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M8 21l8 8 16-17" fill="none" stroke="#140c27" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="t">texts after you<br/>said STOP</div></div>
+          <div class="row" id="c2"><div class="ck"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M8 21l8 8 16-17" fill="none" stroke="#140c27" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="t">texts you never<br/>agreed to</div></div>
+          <div class="row" id="c3"><div class="ck"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M8 21l8 8 16-17" fill="none" stroke="#140c27" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="t">texts after 9 PM or<br/>before 8 AM <span class="emo">🌙</span></div></div>
+          <div class="rule"></div>
+          <div class="two" id="two">2+ texts from the same company</div>
+          <div class="vary" id="vary">Not every text qualifies. Results vary.</div>
+          <div class="each" id="each">Each one that does: up to $500*</div>
+          <div class="fp" id="cfp">*Statutory damages under the TCPA, 47 U.S.C. § 227. Not a guarantee.</div>
+        </div>
+        <div id="mine"><div class="ts"><b>Today</b> 2:06 AM</div><div class="bub">Kixrush: LAST CALL. 40% off ends at 3 AM</div>
+          <svg class="ring" viewBox="0 0 100 50" preserveAspectRatio="none"><path d="M6 27 C 4 8, 92 4, 95 24 C 98 44, 10 48, 5 30 C 3 22, 20 10, 40 9" fill="none" stroke="#ff3b3b" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>
+          <div class="tag">like mine <span class="emo">💀</span></div></div></div>
+        <div class="layer" id="cta"><div class="phone"><iframe id="kitCta"></iframe>
+          <div class="ov"><div id="lp"><img src="assets/lp_money.png" alt="" /><div class="addr">spamclaims.com</div><div id="tapLp"></div></div>
+            <div id="thumb"><img src="../blender/textures/ad6/thread.png" alt="" /></div><div id="shotFlash"></div></div></div></div>
+      </div>
+      <div class="layer" id="money"><div class="rays"></div><canvas id="spark" width="1080" height="1920"></canvas>
+        <div class="up">could be worth up to</div>
+        <div class="usd"><span>$500</span><sup>*</sup></div>
+        <div class="per">for <b>EVERY</b> text<br/>after your STOP</div>
+        <div class="q">*Statutory damages per violating text under the federal TCPA, 47 U.S.C. § 227. Not a guarantee; results vary.</div></div>
+      <div id="vig"></div>
+      <div id="stickers">
+        <div class="sticker" id="sStory" style="left:540px; top:300px"><div class="pill" style="background:var(--yellow); color:var(--ink)">STORYTIME <span class="emo">📖</span></div>
+          <div style="margin-top:12px; text-align:center; font: 600 26px/1 'Hind'; color: rgb(255 255 255 / 0.85); text-shadow: 0 2px 8px #000">Dramatization</div></div>
+        <div class="sticker" id="sEach" style="left:540px; top:330px"><div class="pill" style="background:#fff; color:var(--ink); font-size:54px">UP TO $500 <span style="color:#ff3b3b">EACH</span> <span class="emo">🤯</span></div></div>
+        <div class="sticker" id="sClock" style="left:540px; top:310px"><div class="pill" style="background:rgb(20 12 39 / 0.85); color:#fff; box-shadow: 0 0 0 3px rgb(255 255 255 / 0.25), 0 10px 30px rgb(0 0 0 / 0.5)">2:07 AM <span class="emo">🌙</span></div></div>
+        <div class="sticker" id="sShock" style="left:540px; top:320px"><div class="pill" style="background:var(--yellow); color:var(--ink); font-size:60px">PER TEXT?! <span class="emo">😳</span></div></div>
+        <div class="sticker" id="sScam" style="left:540px; top:320px"><div class="pill" style="background:#ff3b3b; color:#fff; font-size:64px">SCAM? <span class="emo">🚩🚩</span></div></div>
+        <div class="sticker" id="sReal" style="left:300px; top:310px"><div class="pill" style="background:#fff; color:var(--ink); font-size:50px">100% REAL <span class="emo">✅</span></div></div>
+        <div class="sticker" id="sLegal" style="left:780px; top:420px"><div class="pill" style="background:var(--yellow); color:var(--ink); font-size:50px">100% LEGAL <span class="emo">⚖️</span></div></div>
+        <div class="sticker" id="sFrfr" style="left:540px; top:545px"><div class="pill" style="background:var(--pink); color:var(--ink); font-size:56px">FR FR <span class="emo">🔥</span></div></div>
+      </div>
+      <div id="caps"></div>
+      <div id="end"><div class="shade"></div>
+        <img class="logo" src="../public/logo-reversed.png" alt="SpamClaims.com" />
+        <div class="h">Spam texts?<br />They could be<br />worth <span class="y">money.</span></div>
+        <div class="m">Each qualifying text: up to <b>$500*</b></div>
+        <div class="cta">spamclaims.com</div>
+        <div class="fine" id="fine"></div></div>
+      <canvas id="grain" width="540" height="960"></canvas>
+      <div id="flash"></div>
+    </div>
+    <script>
+      const KIT = '../../ios-ui-kit/ios.html';
+      const $ = (s) => document.querySelector(s);
+      const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+      const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+      const ease = (x) => { x = clamp(x); return x * x * x * (x * (x * 6 - 15) + 10); };
+      const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);
+      const backOut = (x, c = 1.6) => { const s = clamp(x) - 1; return 1 + (c + 1) * s * s * s + c * s * s; };
+      const lerp = (a, b, k) => a + (b - a) * k;
+      const S = 2.2488;                       // kit pt -> px inside the phone card
+      const NUM = '+1 (844) 555-0193', B = 'Kixrush';
+      let E, EV, SC;
+
+      // ------------------------------------------------------------------ the iOS kit in iframes
+      function loadKit(id) {
+        return new Promise((res) => {
+          const f = document.getElementById(id);
+          f.addEventListener('load', async () => {
+            const w = f.contentWindow;
+            await new Promise((r) => { const t = () => (w.__READY__ ? r() : setTimeout(t, 20)); t(); });
+            const d = w.document;
+            const lk = d.createElement('link');
+            lk.rel = 'stylesheet';
+            lk.href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=block';
+            d.head.appendChild(lk);
+            const st = d.createElement('style');
+            st.textContent = '.ios { font-family: "Inter Kit", "Noto Color Emoji", "Inter Variable", Inter, Arial, sans-serif !important; }' +
+              '.ios-edge[style*="top: 0px"] { height: 176px !important; background: linear-gradient(180deg, #000 0px, #000 132px, ' +
+              'rgba(0,0,0,0.86) 150px, rgba(0,0,0,0) 176px) !important; }';
+            d.head.appendChild(st);
+            await new Promise((r) => lk.addEventListener('load', r, { once: true }));
+            await d.fonts.load('20px "Noto Color Emoji"', '💀😭🔥');
+            res({ f, w, key: null, root: d.getElementById('screen') });
+          }, { once: true });
+          f.src = KIT;
+        });
+      }
+      function setKit(kit, key, state) {
+        if (kit.key === key) return;
+        kit.key = key;
+        kit.w.IOSKit.render(kit.root, state);
+        kit.track = kit.root.querySelector('.ios-track');
+        kit.bubbles = [...kit.track.querySelectorAll('.ios-b')];
+        kit.boxes = kit.bubbles.map((b) => ({ el: b, top: b.offsetTop, h: b.offsetHeight, left: b.offsetLeft, w: b.offsetWidth, side: b.dataset.side }));
+      }
+      function scrollKit(kit, y) { if (kit.track) kit.track.style.transform = `translateY(${(-y).toFixed(2)}px)`; }
+      function pop(el, side, u) {                // a new bubble springs in from its tail corner
+        if (!el) return;
+        const a = backOut(u / 0.3, 1.5);
+        el.style.transformOrigin = side === 'out' ? '100% 100%' : '0% 100%';
+        el.style.transform = u < 0.36 ? `scale(${(0.35 + 0.65 * a).toFixed(4)})` : '';
+        el.style.opacity = clamp(u / 0.05).toFixed(3);
+      }
+      // a thread that grows over time: items[k] appears at at[k]; scroll keeps the newest bubble's bottom at kit y Y
+      function grow(kit, name, base, items, at, sec, Y, extra) {
+        let n = 0;
+        while (n < items.length && at[n] <= sec) n++;
+        const key = name + n + (extra ? extra.key : '');
+        const its = items.slice(0, n).map((it, k) => (extra && extra.map ? extra.map(it, k) : it));
+        setKit(kit, key, Object.assign({}, base, { items: its, scroll: 0 }));
+        // scroll targets from cached layouts per count
+        const target = (m) => {
+          const ck = name + m;
+          if (!(ck in LAYOUT)) {
+            setKit(kit, ck + '#probe', Object.assign({}, base, { items: items.slice(0, m), scroll: 0 }));
+            const bx = kit.boxes;
+            LAYOUT[ck] = bx.length ? Math.max(...bx.map((b) => b.top + b.h)) : 0;
+            setKit(kit, key, Object.assign({}, base, { items: its, scroll: 0 }));
+          }
+          return Math.max(0, LAYOUT[ck] - Y);
+        };
+        const cur = target(n), prev = target(Math.max(0, n - 1));
+        const tA = n > 0 ? at[n - 1] : 0;
+        const y = lerp(prev, cur, easeOut((sec - tA) / 0.28));
+        scrollKit(kit, y);
+        // the newest bubble pops in
+        if (n > 0 && kit.boxes.length) {
+          const last = kit.boxes[kit.boxes.length - 1];
+          pop(last.el, last.side, sec - tA);
+        }
+        return { n, y };
+      }
+      const LAYOUT = {};
+      let KT, KC, KK;
+
+      // ------------------------------------------------------------------ data
+      const THREAD = [
+        { type: 'header', label: 'Text Message • SMS', time: 'Wed, Sep 3 at 6:12\u202fPM' },
+        { type: 'in', text: `${B}: Your size is BACK. 30% off restocks tonight only. Reply STOP to opt out` },
+        { type: 'out', text: 'STOP' },
+        { type: 'in', text: `${B}: You have been unsubscribed. No more messages will be sent.` },
+        { type: 'time', day: 'Sun, Sep 21', time: '7:40\u202fPM' },
+        { type: 'in', text: `${B}: New drop alert! Members get early access tonight` },
+        { type: 'time', day: 'Thu, Oct 2', time: '1:15\u202fPM' },
+        { type: 'in', text: `${B}: Still thinking about it? Your cart expires in 2 hrs` },
+        { type: 'time', day: 'Today', time: '2:06\u202fAM' },
+        { type: 'in', text: `${B}: LAST CALL. 40% off ends at 3 AM` },
+      ];
+      const T_BASE = { screen: 'messages', mode: 'dark', statusTime: '2:06', battery: 0.22, signalBars: 3, header: { name: NUM }, compose: true };
+      const AV = {
+        Marcus: { initials: 'M', color: 'linear-gradient(180deg, #ffb340, #ff7a00)' },
+        Jay: { initials: 'J', color: 'linear-gradient(180deg, #5ac8fa, #0a84ff)' },
+        Ava: { initials: 'A', color: 'linear-gradient(180deg, #ff6fb1, #d6308f)' },
+      };
+      const STATUTE_SRC = 'file:///C:/Users/moise/Projects/spamclaims-lp3d/ad6/assets/statute.png';
+      const C_BASE = { screen: 'messages', mode: 'dark', imessage: true, group: true, statusTime: '2:09', battery: 0.2, signalBars: 3, compose: true,
+        header: { name: 'the gc', group: [AV.Marcus, AV.Jay, AV.Ava] } };
+
+      // ------------------------------------------------------------------ captions
+      let CAPS = [];
+      function buildCaps() {
+        const host = $('#caps');
+        CAPS = E.captions.map((c) => {
+          const el = document.createElement('div');
+          el.className = 'cap';
+          c.words.forEach((w, k) => {
+            const s = document.createElement('span');
+            s.className = 'w' + (w.hl ? ' y' : '');
+            s.textContent = w.w.replace('SpamClaims', 'SpamClaims.com').replace(/^dot$/, '').replace(/^com\.$/, '');
+            el.appendChild(s);
+            if (k < c.words.length - 1 && s.textContent) el.appendChild(document.createTextNode(' '));
+          });
+          host.appendChild(el);
+          return Object.assign({ el, spans: [...el.querySelectorAll('.w')] }, c);
+        });
+      }
+      function setCaps(sec, show) {
+        CAPS.forEach((c) => {
+          const v = show ? Math.min(smooth((sec - c.at) / 0.08), 1 - smooth((sec - c.until + 0.06) / 0.06)) : 0;
+          c.el.style.opacity = v.toFixed(3);
+          if (v <= 0) return;
+          const p = backOut((sec - c.at) / 0.2, 1.8);
+          c.el.style.transform = `scale(${(0.86 + 0.14 * p).toFixed(4)})`;
+          c.words.forEach((w, k) => {
+            const on = sec >= w.s - 0.03 && sec < w.e + 0.05;
+            const sp = c.spans[k];
+            sp.style.color = on || w.hl ? 'var(--yellow)' : '#fff';
+            sp.style.transform = on ? 'scale(1.08)' : '';
+          });
+        });
+      }
+
+      // ------------------------------------------------------------------ stickers
+      function sticker(id, a, b, sec, rot = 0) {
+        const el = document.getElementById(id);
+        const v = Math.min(smooth((sec - a) / 0.06), 1 - smooth((sec - b + 0.08) / 0.08));
+        el.style.opacity = v.toFixed(3);
+        if (v <= 0) return;
+        const p = backOut((sec - a) / 0.28, 2.2);
+        el.style.transform = `translate(-50%, 0) rotate(${(rot + 6 * (1 - clamp((sec - a) / 0.25))).toFixed(2)}deg) scale(${(0.3 + 0.7 * p).toFixed(4)})`;
+      }
+
+      // ------------------------------------------------------------------ the $500 sparks (seeded, a function of time)
+      const SPARKS = [];
+      (function () {
+        let s = 7;
+        const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+        for (let i = 0; i < 160; i++) {
+          const a = rnd() * Math.PI * 2, v = 700 + rnd() * 1700;
+          SPARKS.push({ a, v, r: 3 + rnd() * 9, c: rnd() < 0.6 ? '#ffe066' : (rnd() < 0.5 ? '#ffffff' : '#ff9ad0'), d: rnd() * 0.08 });
+        }
+      })();
+      function drawSparks(u) {
+        const cv = $('#spark'), g = cv.getContext('2d');
+        g.clearRect(0, 0, 1080, 1920);
+        if (u < 0) return;
+        SPARKS.forEach((p) => {
+          const t = u - p.d;
+          if (t < 0) return;
+          const x = 540 + Math.cos(p.a) * p.v * t * (1 - 0.35 * t);
+          const y = 740 + Math.sin(p.a) * p.v * t * (1 - 0.35 * t) + 900 * t * t;
+          const al = clamp(1 - t / 0.95);
+          if (al <= 0) return;
+          g.globalAlpha = al;
+          g.fillStyle = p.c;
+          g.beginPath();
+          g.moveTo(x, y - p.r * 2.2); g.lineTo(x + p.r * 0.6, y - p.r * 0.6); g.lineTo(x + p.r * 2.2, y); g.lineTo(x + p.r * 0.6, y + p.r * 0.6);
+          g.lineTo(x, y + p.r * 2.2); g.lineTo(x - p.r * 0.6, y + p.r * 0.6); g.lineTo(x - p.r * 2.2, y); g.lineTo(x - p.r * 0.6, y - p.r * 0.6);
+          g.closePath(); g.fill();
+        });
+        g.globalAlpha = 1;
+      }
+      function drawGrain(i) {
+        const cv = $('#grain'), g = cv.getContext('2d');
+        const im = g.createImageData(540, 960);
+        let s = 1 + (i * 7919) % 2147483646;
+        for (let k = 0; k < im.data.length; k += 4) {
+          s = (s * 16807) % 2147483647;
+          const v = (s & 255);
+          im.data[k] = im.data[k + 1] = im.data[k + 2] = v;
+          im.data[k + 3] = 255;
+        }
+        g.putImageData(im, 0, 0);
+      }
+
+      // ------------------------------------------------------------------ scenes
+      function sceneAt(sec) {
+        for (let k = SC.length - 1; k >= 0; k--) if (sec >= SC[k][1]) return { name: SC[k][0], start: SC[k][1], k };
+        return { name: SC[0][0], start: 0, k: 0 };
+      }
+      function setThread(sec) {
+        const at = [-9, -9, EV.stop, EV.unsub, EV.after[0], EV.after[0], EV.after[1], EV.after[1], EV.after[2], EV.after[2]];
+        grow(KT, 'thread', T_BASE, THREAD, at, sec, 352);
+        // the hand-drawn ring around STOP
+        const stopBox = KT.boxes.find((b) => b.el.textContent.trim() === 'STOP');
+        const ring = $('#stopRing'), path = $('#ringPath');
+        if (stopBox && sec >= EV.stop + 0.12) {
+          const ty = parseFloat((KT.track.style.transform.match(/-?[\d.]+/) || [0])[0]);
+          ring.style.left = `${stopBox.left - 16}px`; ring.style.top = `${stopBox.top + ty - 9}px`;
+          ring.style.width = `${stopBox.w + 32}px`; ring.style.height = `${stopBox.h + 18}px`;
+          const L = 320, k = easeOut((sec - EV.stop - 0.12) / 0.3);
+          path.style.strokeDasharray = `${L}`; path.style.strokeDashoffset = `${(L * (1 - k)).toFixed(1)}`;
+          ring.style.opacity = (1 - smooth((sec - EV.after[0]) / 0.15)).toFixed(3);
+        } else ring.style.opacity = '0';
+      }
+      function setSearch(sec) {
+        const q = 'can you sue for spam texts after STOP';
+        const t0 = EV.search + 0.12;
+        const n = Math.floor(clamp((sec - t0) / 0.85) * q.length);
+        $('#search .q').innerHTML = (n ? `<span>${q.slice(0, n)}</span>` : '<span style="color:#8a8a8e">Search</span>') + (Math.floor(sec * 2.5) % 2 === 0 || n < q.length ? '<span class="caret"></span>' : '');
+        const r0 = t0 + 1.0;
+        [...document.querySelectorAll('#search .res')].forEach((el, k) => {
+          const v = smooth((sec - r0 - k * 0.08) / 0.12);
+          el.style.opacity = v.toFixed(3);
+          el.style.transform = `translateY(${(14 * (1 - v)).toFixed(1)}px)`;
+        });
+        const tap = $('#search .tap'), tt = EV.statute - 0.22;
+        const tv = clamp(1 - Math.abs(sec - tt) / 0.14);
+        tap.style.left = '190px'; tap.style.top = '172px';
+        tap.style.opacity = tv.toFixed(3);
+        tap.style.transform = `scale(${(0.6 + 0.5 * clamp((sec - tt + 0.14) / 0.28)).toFixed(3)})`;
+      }
+      function setStatute(sec) {
+        const t0 = EV.statute;
+        const k = easeOut((sec - t0) / 0.32);
+        const zoom = ease((sec - EV.sweep) / 2.0);
+        const card = $('#statute .card');
+        card.style.transform = `translateY(${(900 * (1 - k)).toFixed(1)}px) rotate(${(-4 * (1 - k)).toFixed(2)}deg) scale(${(1 + 0.1 * zoom).toFixed(4)})`;
+        const sc = 960 / E.statute.w;
+        E.statute.hl.forEach((r, i) => {
+          const el = document.getElementById('hl' + i);
+          const a = EV.sweep + 0.1 + i * 0.55, u = easeOut((sec - a) / 0.55);
+          el.style.left = `${r.x * sc - 4}px`; el.style.top = `${(r.y + 6) * sc}px`;
+          el.style.height = `${(r.h - 8) * sc}px`; el.style.width = `${((r.w + 8) * sc * u).toFixed(1)}px`;
+          el.style.opacity = u > 0 ? '0.95' : '0';
+        });
+        sticker('fedStamp', EV.federal, EV.money + 1, sec, 8);
+        $('#fedStamp').style.transform = $('#fedStamp').style.transform.replace('translate(-50%, 0) ', '');
+      }
+      function setMoney(sec) {
+        const u = sec - EV.money;
+        const k = backOut(u / 0.32, 1.9);
+        $('#money .usd').style.transform = `scale(${(2.4 - 1.4 * clamp(k, 0, 1.2)).toFixed(4)})`;
+        $('#money .usd').style.opacity = clamp(u / 0.05).toFixed(3);
+        $('#money .up').style.opacity = clamp((u - 0.02) / 0.08).toFixed(3);
+        $('#money .per').style.opacity = clamp((u - 0.18) / 0.1).toFixed(3);
+        $('#money .per').style.transform = `translateY(${(30 * (1 - easeOut((u - 0.18) / 0.25))).toFixed(1)}px)`;
+        $('#money .q').style.opacity = clamp((u - 0.25) / 0.12).toFixed(3);
+        const rays = $('#money .rays');
+        rays.style.opacity = (0.9 * clamp(u / 0.1)).toFixed(3);
+        rays.style.transform = `rotate(${(u * 26).toFixed(2)}deg) scale(${(0.8 + 0.25 * easeOut(u / 0.5)).toFixed(3)})`;
+        drawSparks(u - 0.06);
+      }
+      function setChat(sec) {
+        const items = E.chat.items.map(([t, who, kind, text]) => {
+          if (kind === 'image') return { type: 'image', side: 'out', src: STATUTE_SRC, w: 232, h: 164 };
+          if (who === 'me') return { type: 'out', text };
+          return { type: 'in', from: who, avatar: AV[who], text };
+        });
+        const at = E.chat.items.map((x) => x[0]);
+        const [tbT, tbIdx, tbGlyph] = E.chat.tapback;
+        const tb = sec >= tbT;
+        grow(KC, 'chat', C_BASE, items, at, sec, 436, { key: tb ? 'tb' : '', map: (it, k) => (tb && k === tbIdx ? Object.assign({}, it, { tapback: tbGlyph }) : it) });
+        if (tb) {
+          const el = KC.root.querySelector('.ios-tapback');
+          if (el) {
+            const p = backOut((sec - tbT) / 0.25, 2.4);
+            el.style.transform = `scale(${(0.2 + 0.8 * p).toFixed(3)})`;
+          }
+        }
+      }
+      function setCatch(sec) {
+        const rows = [['c1', EV.c1], ['c2', EV.c2], ['c3', EV.c3]];
+        rows.forEach(([id, t]) => {
+          const el = document.getElementById(id), v = easeOut((sec - t + 0.06) / 0.22);
+          el.style.opacity = clamp(v * 1.4).toFixed(3);
+          el.style.transform = `translateX(${(-50 * (1 - v)).toFixed(1)}px)`;
+          const ck = el.querySelector('.ck');
+          ck.style.transform = `scale(${(0.3 + 0.7 * backOut((sec - t) / 0.3, 2.4)).toFixed(3)})`;
+        });
+        const vv = easeOut((sec - EV.vary1) / 0.25);
+        $('#vary').style.opacity = vv.toFixed(3);
+        $('#two').style.opacity = easeOut((sec - EV.vary1 + 0.3) / 0.25).toFixed(3);
+        const mk = backOut((sec - EV.mine + 0.05) / 0.3, 1.8), mv = clamp((sec - EV.mine + 0.05) / 0.08) * (1 - smooth((sec - EV.vary1 + 0.1) / 0.2));
+        const mine = $('#mine');
+        mine.style.opacity = mv.toFixed(3);
+        mine.style.transform = `translateY(${(40 * (1 - clamp(mk))).toFixed(1)}px) rotate(${(4 - 2 * clamp(mk)).toFixed(2)}deg) scale(${(0.7 + 0.3 * mk).toFixed(4)})`;
+        const rp = mine.querySelector('.ring path'), L = 320, rk = easeOut((sec - EV.mine - 0.15) / 0.3);
+        rp.style.strokeDasharray = `${L}`; rp.style.strokeDashoffset = `${(L * (1 - rk)).toFixed(1)}`;
+        const ee = easeOut((sec - EV.vary2 - 0.25) / 0.3);
+        $('#each').style.opacity = ee.toFixed(3);
+        $('#each').style.transform = `scale(${(0.9 + 0.1 * backOut((sec - EV.vary2 - 0.25) / 0.35)).toFixed(3)})`;
+        $('#cfp').style.opacity = ee.toFixed(3);
+        const card = $('#catch .card'), k = easeOut((sec - EV.catch) / 0.3);
+        card.style.transform = `translateY(${(60 * (1 - k)).toFixed(1)}px) scale(${(0.96 + 0.04 * k).toFixed(4)})`;
+        card.style.opacity = k.toFixed(3);
+      }
+      function setCta(sec) {
+        setKit(KK, 'cta', Object.assign({}, T_BASE, { items: THREAD, scroll: 'bottom' }));
+        const fl = clamp(1 - Math.abs(sec - EV.shot - 0.05) / 0.11);
+        $('#shotFlash').style.opacity = (sec >= EV.shot - 0.06 && sec < EV.shot + 0.2 ? fl : 0).toFixed(3);
+        const th = $('#thumb'), u = sec - EV.shot - 0.08;
+        const tv = u > 0 && sec < EV.web + 0.2 ? 1 : 0;
+        th.style.opacity = (tv * clamp(u / 0.06) * (1 - smooth((sec - EV.web) / 0.2))).toFixed(3);
+        const k = easeOut(u / 0.35);
+        th.style.top = `${lerp(0, 620, k).toFixed(1)}px`;
+        th.style.transform = `scale(${lerp(3.6, 1, k).toFixed(3)})`;
+        th.style.transformOrigin = '0 0';
+        const w = easeOut((sec - EV.web) / 0.3);
+        const lp = $('#lp');
+        lp.style.opacity = w.toFixed(3);
+        lp.style.transform = `translateX(${(402 * (1 - w)).toFixed(1)}px)`;
+        const tapT = EV.web + 1.35, tv2 = clamp(1 - Math.abs(sec - tapT) / 0.16);
+        const tap = $('#tapLp');
+        tap.style.left = '201px'; tap.style.top = '420px';
+        tap.style.opacity = (0.9 * tv2).toFixed(3);
+        tap.style.transform = `scale(${(0.5 + 0.8 * clamp((sec - tapT + 0.16) / 0.32)).toFixed(3)})`;
+      }
+      function setEnd(sec) {
+        const t = sec - E.events.end;
+        $('#end').style.opacity = clamp(t / 0.25).toFixed(3);
+        const lp = backOut((t - 0.05) / 0.4);
+        $('#end .logo').style.transform = `translateX(-50%) translateY(${(-20 * (1 - lp)).toFixed(1)}px) scale(${(0.9 + 0.1 * lp).toFixed(4)})`;
+        $('#end .h').style.opacity = clamp((t - 0.12) / 0.25).toFixed(3);
+        $('#end .m').style.opacity = clamp((t - 0.35) / 0.25).toFixed(3);
+        const cp = backOut((t - 0.5) / 0.4, 1.8);
+        $('#end .cta').style.opacity = clamp((t - 0.5) / 0.1).toFixed(3);
+        $('#end .cta').style.transform = `scale(${(0.7 + 0.3 * cp).toFixed(4)})`;
+        $('#end .fine').style.opacity = clamp((t - 0.65) / 0.25).toFixed(3);
+      }
+
+      const img = $('#f3d');
+      async function show3d(i) {
+        const src = `../blender/frames/ad6/${String(i).padStart(4, '0')}.png`;
+        if (img.dataset.src !== src) { img.dataset.src = src; img.src = src; await img.decode().catch(() => {}); }
+      }
+
+      window.renderFrame = async (i) => {
+        const sec = i / E.fps;
+        const sc = sceneAt(sec);
+        const name = sc.name;
+        const is3d = name === '3d';
+        if (is3d) await show3d(i);
+        img.style.visibility = is3d ? 'visible' : 'hidden';
+        $('#l2d').style.visibility = ['thread', 'search', 'statute', 'chat', 'catch', 'cta'].includes(name) ? 'visible' : 'hidden';
+        ['thread', 'search', 'statute', 'chat', 'catch', 'cta'].forEach((n) => { $('#' + n).style.visibility = n === name ? 'visible' : 'hidden'; });
+        $('#money').style.visibility = name === 'money' ? 'visible' : 'hidden';
+        if (name === 'thread') setThread(sec);
+        if (name === 'search') setSearch(sec);
+        if (name === 'statute') setStatute(sec);
+        if (name === 'money') setMoney(sec);
+        if (name === 'chat') setChat(sec);
+        if (name === 'catch') setCatch(sec);
+        if (name === 'cta') setCta(sec);
+        $('#bg2d').src = name === 'catch' ? '../blender/frames/ad6/0683.png' : '../blender/frames/ad6/0105.png';
+        // stickers
+        sticker('sStory', 0.15, EV.boltup, sec, -3);
+        sticker('sEach', EV.each - 0.02, EV.thread, sec, 3);
+        sticker('sClock', EV.clock - 0.05, EV.search, sec, -2);
+        sticker('sShock', EV.shock + 0.1, EV.skeptic, sec, -3);
+        sticker('sScam', EV.scam, EV.chat, sec, -7);
+        sticker('sReal', EV.real - 0.05, EV.catch, sec, -6);
+        sticker('sLegal', EV.legal - 0.05, EV.catch, sec, 5);
+        sticker('sFrfr', EV.frfr + 0.05, EV.catch, sec, -3);
+        $('#caps').style.top = sec < EV.thread ? '560px' : '1112px';
+        setCaps(sec, !['money', 'catch'].includes(name) && sec < E.events.end - 0.05);
+        if (sec >= E.events.end - 0.02) setEnd(sec); else $('#end').style.opacity = '0';
+        // a punchy cut: zoom settle + flash at every scene change; a shake on the $500 slam
+        const u = sec - sc.start;
+        let z = 1, fl = 0, dx = 0, dy = 0;
+        if (sc.k > 0 && u < 0.14) { z = 1 + 0.05 * (1 - ease(u / 0.14)); fl = 0.22 * (1 - clamp(u / 0.1)); }
+        const us = sec - EV.money;
+        if (us >= 0 && us < 0.5) { const a = 26 * Math.exp(-us / 0.12); dx = a * Math.sin(us * 97); dy = a * Math.cos(us * 83); }
+        $('#stage').style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${z.toFixed(4)})`;
+        $('#flash').style.opacity = (Math.max(fl, us >= 0 && us < 0.12 ? 0.85 * (1 - us / 0.12) : 0)).toFixed(3);
+        drawGrain(i);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return true;
+      };
+
+      window.ready = (async () => {
+        E = await fetch('edit.json').then((r) => r.json());
+        E.statute = await fetch('assets/statute.json').then((r) => r.json());
+        EV = E.events;
+        SC = [
+          ['3d', 0], ['thread', EV.thread], ['3d', EV.thread_end], ['search', EV.search], ['statute', EV.statute], ['money', EV.money],
+          ['3d', EV.shock], ['chat', EV.chat], ['3d', EV.real3d], ['catch', EV.catch], ['cta', EV.cta], ['3d', EV.close],
+        ];
+        buildCaps();
+        $('#fine').textContent = E.fine_print;
+        await document.fonts.ready;
+        await Promise.all(['400 330px "Archivo Black"', '900 78px "Inter"', '600 27px "Hind"', '48px "Noto Color Emoji"'].map((f) => document.fonts.load(f, 'A$5😳🔥')));
+        [KT, KC, KK] = await Promise.all([loadKit('kitThread'), loadKit('kitChat'), loadKit('kitCta')]);
+        return true;
+      })();
+    </script>
+  </body>
+</html>

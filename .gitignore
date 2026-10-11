@@ -34,3 +34,6 @@ ad4/audio/
 # Reel ad 5 build products (frames, audio, video): rebuilt by ad5/build5.py
 ad5/out/
 ad5/audio/
+# Reel ad 6 build products (frames, audio, video): rebuilt by ad6/build6.py
+ad6/out/
+ad6/audio/

@@ -1,0 +1,180 @@
+{
+  "dpr": 3,
+  "viewport": [
+    402,
+    874
+  ],
+  "boxes": [
+    {
+      "cls": "ios-time",
+      "text": "2:07",
+      "x": 35.036460876464844,
+      "y": 21.98958396911621,
+      "w": 37.0625,
+      "h": 16.151042938232422,
+      "lines": null
+    },
+    {
+      "cls": "ios-ts ios-ts--label",
+      "text": "Text Message • SMS",
+      "x": 0,
+      "y": 149.11459350585938,
+      "w": 402,
+      "h": 11.484375,
+      "lines": null
+    },
+    {
+      "cls": "ios-ts",
+      "text": "Wed, Sep 3 at 6:12 PM",
+      "x": 0,
+      "y": 167.09896850585938,
+      "w": 402,
+      "h": 11.484375,
+      "lines": null
+    },
+    {
+      "cls": "ios-b ios-b--in ios-b--tail",
+      "text": "Kixrush: Your size is BACK. 30% off restocks tonight only. Reply STOP to opt out",
+      "x": 18.328125,
+      "y": 189.5260467529297,
+      "w": 282,
+      "h": 76.05208587646484,
+      "lines": "3"
+    },
+    {
+      "cls": "ios-b ios-b--out ios-b--tail",
+      "text": "STOP",
+      "x": 315.671875,
+      "y": 278.375,
+      "w": 68,
+      "h": 36.68229293823242,
+      "lines": "1"
+    },
+    {
+      "cls": "ios-b ios-b--in ios-b--tail",
+      "text": "Kixrush: You have been unsubscribed. No more messages will be sent.",
+      "x": 18.328125,
+      "y": 327.8489685058594,
+      "w": 212.6666717529297,
+      "h": 76.05208587646484,
+      "lines": "3"
+    },
+    {
+      "cls": "ios-ts",
+      "text": "Sun, Sep 21 7:40 PM",
+      "x": 0,
+      "y": 435.7864685058594,
+      "w": 402,
+      "h": 11.484375,
+      "lines": null
+    },
+    {
+      "cls": "ios-b ios-b--in ios-b--tail",
+      "text": "Kixrush: New drop alert! Members get early access tonight",
+      "x": 18.328125,
+      "y": 458.21356201171875,
+      "w": 236,
+      "h": 76.05208587646484,
+      "lines": "3"
+    },
+    {
+      "cls": "ios-ts",
+      "text": "Thu, Oct 2 1:15 PM",
+      "x": 0,
+      "y": 566.1510620117188,
+      "w": 402,
+      "h": 11.484375,
+      "lines": null
+    },
+    {
+      "cls": "ios-b ios-b--in ios-b--tail",
+      "text": "Kixrush: Still thinking about it? Your cart expires in 2 hrs",
+      "x": 18.328125,
+      "y": 588.578125,
+      "w": 263.66668701171875,
+      "h": 56.364585876464844,
+      "lines": "2"
+    },
+    {
+      "cls": "ios-ts",
+      "text": "Today 2:06 AM",
+      "x": 0,
+      "y": 676.828125,
+      "w": 402,
+      "h": 11.484375,
+      "lines": null
+    },
+    {
+      "cls": "ios-b ios-b--in ios-b--tail",
+      "text": "Kixrush: LAST CALL. 40% off ends at 3 AM",
+      "x": 18.328125,
+      "y": 699.2552490234375,
+      "w": 258.66668701171875,
+      "h": 56.364585876464844,
+      "lines": "2"
+    },
+    {
+      "cls": "ios-glass ios-back",
+      "text": "",
+      "x": 18.328125,
+      "y": 56.395835876464844,
+      "w": 40.19791793823242,
+      "h": 40.19791793823242,
+      "lines": null
+    },
+    {
+      "cls": "ios-glass ios-capsule",
+      "text": "",
+      "x": 104.17708587646484,
+      "y": 106.796875,
+      "w": 193.6354217529297,
+      "h": 30.510417938232422,
+      "lines": null
+    },
+    {
+      "cls": "ios-name",
+      "text": "+1 (844) 555-0193",
+      "x": 114.19792175292969,
+      "y": 113.921875,
+      "w": 163.69271850585938,
+      "h": 16.91145896911621,
+      "lines": null
+    },
+    {
+      "cls": "ios-avatar",
+      "text": "",
+      "x": 173.75,
+      "y": 56.848960876464844,
+      "w": 54.5,
+      "h": 54.5,
+      "lines": null
+    },
+    {
+      "cls": "ios-glass ios-glass--strong ios-plus",
+      "text": "",
+      "x": 18.09895896911621,
+      "y": 794.0573120117188,
+      "w": 36.69791793823242,
+      "h": 36.69791793823242,
+      "lines": null
+    },
+    {
+      "cls": "ios-glass ios-field",
+      "text": "",
+      "x": 65.5,
+      "y": 792.8229370117188,
+      "w": 317.8958435058594,
+      "h": 39.171875,
+      "lines": null
+    },
+    {
+      "cls": "ios-placeholder",
+      "text": "Text Message • SMS",
+      "x": 81.19792175292969,
+      "y": 804.5677490234375,
+      "w": 160.64584350585938,
+      "h": 16.375,
+      "lines": null
+    }
+  ]
+}

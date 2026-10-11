@@ -1,0 +1,45 @@
+{
+  "dpr": 3,
+  "viewport": [
+    402,
+    874
+  ],
+  "boxes": [
+    {
+      "cls": "ios-lock-date",
+      "text": "Saturday, October 11",
+      "x": 0,
+      "y": 86.08333587646484,
+      "w": 402,
+      "h": 20.401042938232422,
+      "lines": null
+    },
+    {
+      "cls": "ios-lock-clock",
+      "text": "2:07",
+      "x": 0,
+      "y": 92.91461181640625,
+      "w": 402,
+      "h": 164.72000122070312,
+      "lines": null
+    },
+    {
+      "cls": "ios-notif",
+      "text": "+1 (844) 555-01931h agoKixrush: Members only: 40% off starts NOW",
+      "x": 12,
+      "y": 666,
+      "w": 378,
+      "h": 86,
+      "lines": null
+    },
+    {
+      "cls": "ios-notif",
+      "text": "+1 (844) 555-0193nowKixrush: LAST CALL. 40% off ends at 3 AM",
+      "x": 12,
+      "y": 572,
+      "w": 378,
+      "h": 86,
+      "lines": null
+    }
+  ]
+}

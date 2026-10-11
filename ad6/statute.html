@@ -1,0 +1,34 @@
+<!doctype html>
+<!-- Ad 6: the federal law card (the real text of 47 U.S.C. § 227(c)(5), public law, quoted with ellipses; no website
+     branding). shoot_statute.cjs captures it to assets/statute.png and records where the highlighted words sit. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,800&family=Hind:wght@500;600&display=block" />
+    <style>
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; src: url(../public/fonts/inter-latin-opsz-normal.woff2) format('woff2'); }
+      html, body { margin: 0; background: transparent; }
+      #card { width: 1000px; box-sizing: border-box; padding: 64px 70px 70px; border-radius: 34px; background: #f8f6f0;
+        color: #1b1a22; position: relative; }
+      .kicker { font: 700 22px/1 'Inter'; letter-spacing: 0.22em; color: #8d8a99; text-transform: uppercase; }
+      h1 { margin: 22px 0 0; font: 800 64px/1.02 'Source Serif 4', Georgia, serif; letter-spacing: -0.01em; }
+      .sub { margin-top: 18px; font: 600 27px/1.3 'Inter'; color: #5d5a6c; }
+      .rule { height: 3px; background: #e2ded3; margin: 34px 0 30px; }
+      p { margin: 0; font: 400 38px/1.5 'Source Serif 4', Georgia, serif; color: #2a2833; }
+      .gap { color: #9b98a6; }
+      mark { background: transparent; color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div id="card">
+      <div class="kicker">United States Code · Federal law</div>
+      <h1>47 U.S.C. § 227(c)(5)</h1>
+      <div class="sub">Telephone Consumer Protection Act · Private right of action</div>
+      <div class="rule"></div>
+      <p>A person who has received more than one telephone call within any 12-month period by or on behalf of the same
+        entity in violation of the regulations prescribed under this subsection may <span class="gap">…</span> bring
+        <span class="gap">…</span> an action <span class="gap">…</span> <mark id="hl">to receive up to $500 in damages for each
+        such violation</mark><span class="gap">…</span></p>
+    </div>
+  </body>
+</html>
