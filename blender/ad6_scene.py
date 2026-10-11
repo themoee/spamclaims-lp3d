@@ -295,8 +295,11 @@ def set_camera(loc, target, lens, fstop, focus=None, shake=0.0, t=0.0):
     CAM.dof.focus_distance = max(0.05, (f - loc).length)
 
 
+KEY_MULT = float(args.get("keymult", "0.34"))   # the screen faces his face now: its light is close, keep it a glow
+
+
 def lights(key=2.2, rim=1.0, led=1.0, led_col=(0.55, 0.22, 1.0), rim_col=None):
-    KEY.data.energy = key
+    KEY.data.energy = key * KEY_MULT
     for nm in ("Rim", "RimR"):
         LIGHTS[nm].data.energy = LIGHTS[nm]["base"] * rim
     if rim_col is not None:
@@ -322,7 +325,8 @@ def phone_in_front(t, dist=0.3, drop=0.1, side_off=-0.02, tilt=0.0, buzz=0.0):
     to_eye = (sp_eye - tgt).normalized()
     up = V((0, 0.25 + tilt, 1.0)).normalized()
     fingers = (up - to_eye * up.dot(to_eye)).normalized()
-    ik_arm("R", tgt, hint=(-0.6, 0.3, -0.75), palm_n=-to_eye, fingers=fingers)
+    # the palm faces his eyes and the phone lies in it, screen toward him (the back of the phone toward us)
+    ik_arm("R", tgt, hint=(-0.6, 0.3, -0.75), palm_n=to_eye, fingers=fingers)
 
 
 def left_rest(lap=True):
@@ -417,7 +421,7 @@ def shot_twoam(t):
     dre.face(blink=0.2 + blinks(t, [t0 + 0.9]), look=(-0.1, -0.55), brow=(-0.1, 0.25), brow_tilt=(0.25, 0.1), squint=0.15,
              mouth=dict(open=0.05, wide=0.9, smile=-0.1))
     screen("thread", 1.15)
-    lights(key=2.8, rim=0.55, led=0.45)
+    lights(key=2.1, rim=0.55, led=0.45)
     k = ease((t - t0) / 1.8)
     set_camera(lerp((-0.46, -0.82, 1.16), (-0.4, -0.72, 1.17), k), (0.0, 0.3, 1.12), 45, 2.0, shake=0.003, t=t)
 

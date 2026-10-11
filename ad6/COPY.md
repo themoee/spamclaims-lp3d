@@ -23,7 +23,10 @@ A Gen Z storytime. Dre, an animated 3D character, tells how he found out that hi
      - Texts after 9 PM or before 8 AM, your local time (the quiet hours).
    - His 2:06 AM Kixrush text pops in as the receipt: "like mine 💀".
    - Then "2+ texts from the same company", "Not every text qualifies. Results vary." and "Each one that does: up to $500*".
-8. **The action.** "Screenshot your texts, and check them free at SpamClaims dot com." The screenshot goes to the landing page.
+8. **The action.** "Screenshot your texts, and check them free at SpamClaims dot com."
+   - The screenshot flashes, then the quick funnel slides in.
+   - A tap on "Check my texts" goes to "What did they do?" with picks, a tap on Next to "How many texts" and the "up to $3,000*" meter.
+   - It is the same funnel the ad links to.
 9. **The close.** "They ignored your STOP. The law didn't." End card: "Spam texts? They could be worth money." / "Each qualifying text: up to $500*" / spamclaims.com / fine print.
 
 ## Primary text
@@ -36,7 +39,7 @@ Screenshot your texts and see if they may qualify at SpamClaims.com
 
 *Statutory damages under 47 U.S.C. § 227, not a guarantee. Dramatization: the characters and messages are fictional. SpamClaims is not a law firm and does not provide legal advice.
 
-## Headline (word for word the landing page's)
+## Headline (word for word the funnel's first screen and the ad's end card)
 
 Spam texts? They could be worth money.
 
@@ -50,7 +53,12 @@ Learn More
 
 ## Website URL
 
-`https://spamclaims.com/lp/money?vv=reel-storytime&utm_source=instagram&utm_medium=paid_social&utm_campaign=reel_money&utm_content=reel-storytime`
+`https://spamclaims.com/lp/quick?vv=reel-storytime&utm_source=instagram&utm_medium=paid_social&utm_campaign=reel_quick&utm_content=reel-storytime`
+
+`/lp/quick` is the quick funnel built for this ad: one tap per card, no dropdowns, the screenshots and three fields.
+- It opens on the same headline as the ad's end card.
+- It goes live after Publish -> Update in Lovable (spamclaims main `833ca68`).
+- Until then, use `/lp/money`.
 
 ## Audience
 

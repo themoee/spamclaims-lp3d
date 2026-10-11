@@ -78,8 +78,10 @@
       #catch .fp { margin-top: 16px; font: 500 22px/1.35 'Hind'; color: rgb(255 255 255 / 0.62); opacity: 0; }
       /* the landing page in the phone */
       #lp { position: absolute; left: 0; top: 0; width: 402px; height: 874px; opacity: 0; }
-      #cta .phone { transform-origin: 50% 0; transform: scale(0.8); }
-      #lp img { width: 402px; height: 874px; display: block; }
+      #cta .phone { transform-origin: 50% 0; transform: translateY(170px) scale(0.72); }
+      #lp { overflow: hidden; }
+      #lp .feed { position: absolute; left: 0; top: 0; width: 402px; }
+      #lp .feed img { width: 402px; height: 874px; display: block; }
       #lp .addr { position: absolute; left: 24px; right: 24px; top: 816px; height: 44px; border-radius: 22px; background: rgb(42 34 66 / 0.94);
         font: 500 16px/44px 'Inter'; color: #fff; text-align: center; }
       #thumb { position: absolute; left: 22px; width: 104px; height: 226px; border-radius: 14px; overflow: hidden; opacity: 0;
@@ -150,7 +152,7 @@
           <svg class="ring" viewBox="0 0 100 50" preserveAspectRatio="none"><path d="M6 27 C 4 8, 92 4, 95 24 C 98 44, 10 48, 5 30 C 3 22, 20 10, 40 9" fill="none" stroke="#ff3b3b" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>
           <div class="tag">like mine <span class="emo">💀</span></div></div></div>
         <div class="layer" id="cta"><div class="phone"><iframe id="kitCta"></iframe>
-          <div class="ov"><div id="lp"><img src="assets/lp_money.png" alt="" /><div class="addr">spamclaims.com</div><div id="tapLp"></div></div>
+          <div class="ov"><div id="lp"><div class="feed"><img src="assets/quick_intro.png" alt="" /><img src="assets/quick_what.png" alt="" /><img src="assets/quick_count.png" alt="" /></div><div class="addr">spamclaims.com</div><div id="tapLp"></div></div>
             <div id="thumb"><img src="../blender/textures/ad6/thread.png" alt="" /></div><div id="shotFlash"></div></div></div></div>
       </div>
       <div class="layer" id="money"><div class="rays"></div><canvas id="spark" width="1080" height="1920"></canvas>
@@ -502,11 +504,18 @@
         const lp = $('#lp');
         lp.style.opacity = w.toFixed(3);
         lp.style.transform = `translateX(${(402 * (1 - w)).toFixed(1)}px)`;
-        const tapT = EV.web + 1.35, tv2 = clamp(1 - Math.abs(sec - tapT) / 0.16);
+        // the quick funnel, bam bam bam: tap "Check my texts", the feed scrolls to the first question (picked),
+        // tap Next, it scrolls to the count and the "up to $3,000*" meter
+        const f1 = EV.web + 0.85, f2 = EV.web + 1.55;
+        const kf = easeOut((sec - f1) / 0.3) + easeOut((sec - f2) / 0.3);
+        $('#lp .feed').style.transform = `translateY(${(-874 * kf).toFixed(1)}px)`;
+        const taps = [[EV.web + 0.62, 201, 626], [EV.web + 1.37, 201, 697]];
         const tap = $('#tapLp');
-        tap.style.left = '201px'; tap.style.top = '420px';
+        let tv2 = 0, tx = 201, ty = 626, tt = taps[0][0];
+        taps.forEach(([t0, x, y]) => { const v = clamp(1 - Math.abs(sec - t0) / 0.16); if (v > tv2) { tv2 = v; tx = x; ty = y; tt = t0; } });
+        tap.style.left = `${tx}px`; tap.style.top = `${ty}px`;
         tap.style.opacity = (0.9 * tv2).toFixed(3);
-        tap.style.transform = `scale(${(0.5 + 0.8 * clamp((sec - tapT + 0.16) / 0.32)).toFixed(3)})`;
+        tap.style.transform = `scale(${(0.5 + 0.8 * clamp((sec - tt + 0.16) / 0.32)).toFixed(3)})`;
       }
       function setEnd(sec) {
         const t = sec - E.events.end;
@@ -554,7 +563,7 @@
         sticker('sReal', EV.real - 0.05, EV.catch, sec, -6);
         sticker('sLegal', EV.legal - 0.05, EV.catch, sec, 5);
         sticker('sFrfr', EV.frfr + 0.05, EV.catch, sec, -3);
-        $('#caps').style.top = sec < EV.thread ? '560px' : '1112px';
+        $('#caps').style.top = sec < EV.thread ? '560px' : (name === 'cta' ? '292px' : '1112px');
         setCaps(sec, !['money', 'catch'].includes(name) && sec < E.events.end - 0.05);
         if (sec >= E.events.end - 0.02) setEnd(sec); else $('#end').style.opacity = '0';
         // a punchy cut: zoom settle + flash at every scene change; a shake on the $500 slam

@@ -199,7 +199,11 @@ def mix():
     place(fx, c["swipe"], EV["cta"] - 0.02, -18)
     place(fx, c["shutter"], EV["shot"] - 0.01, -8)
     place(fx, c["swipe"], EV["web"] - 0.03, -17)
-    place(fx, c["tap"], EV["web"] + 1.35, -13)
+    for dt in (0.62, 1.37):                                          # taps in the quick funnel
+        place(fx, c["tap"], EV["web"] + dt, -13)
+    for dt in (0.85, 1.55):                                          # the feed scrolls to the next card
+        place(fx, c["swipe"], EV["web"] + dt - 0.02, -19)
+    place(fx, c["pop"], EV["web"] + 1.62, -14)                       # the "up to $3,000*" meter
     # the close
     place(fx, c["hit"], EV["law"] - 0.03, -16)
     place(fx, c["chime"], EV["end"] + 0.1, -8)
