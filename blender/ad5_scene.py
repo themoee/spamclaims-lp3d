@@ -2,8 +2,9 @@
 the camera rises over the screen as the evidence is counted, then the phone screenshots it and opens spamclaims.com.
 
 blender -b --factory-startup -P ad5_scene.py -- [preview=1] [samples=N] [only=0,120] [step=8] [out=frames/ad5] [force=1]
-Few objects, all about realism: walnut, a braided cable, a glass of water, books, an earbuds case, a linen lamp, the
-bed, moonlight through blinds, the screen as the main light, a 50-70 mm lens at f/2, a little handheld drift.
+Few objects, all about realism: walnut, a woven USB-C cable plugged into the phone (and, behind the nightstand, into an
+adapter in the outlet), a glass of water, books, an earbuds case, a linen lamp, the bed, moonlight through blinds, the
+screen as the main light, 42-60 mm lenses at f/4-6.3, a little handheld drift.
 """
 import json
 import math
@@ -140,6 +141,9 @@ def rounded_box(name, center, size, mat, bevel, segs=6):
     ob = bpy.context.object
     ob.name = name
     ob.scale = size
+    # NB: transform_apply also bakes the location (its defaults), so the origin is the world origin and a rotation set
+    # afterwards pivots there, not at the box centre. The set was dressed by eye like that; keep it, but never place
+    # anything relative to a rotated box from its nominal centre.
     bpy.ops.object.transform_apply(scale=True)
     b = ob.modifiers.new("Bevel", "BEVEL")
     b.width = bevel
@@ -229,27 +233,214 @@ def image(name):
     return IMG[name]
 
 
-# braided USB-C cable from the phone's bottom port, over the back edge
-port = PH_AT + mathutils.Vector((math.sin(-PH_YAW) * -0.0745 * -1, -math.cos(PH_YAW) * 0.0745, 0.0))
-pts = [port + mathutils.Vector(v) for v in [(0, -0.012, 0), (0.0, -0.05, -0.002), (0.05, -0.085, -0.0035), (0.13, -0.06, -0.0035),
-                                             (0.19, 0.05, -0.0035), (0.2, 0.15, -0.0035), (0.205, 0.205, -0.004), (0.21, 0.24, -0.06),
-                                             (0.21, 0.26, -0.3)]]
-cu = bpy.data.curves.new("Cable", "CURVE")
-cu.dimensions = "3D"
-cu.bevel_depth = 0.0019
-cu.bevel_resolution = 4
-spl = cu.splines.new("NURBS")
-spl.points.add(len(pts) - 1)
-for k, v in enumerate(pts):
-    spl.points[k].co = (v.x, v.y, v.z + 0.002, 1.0)
-spl.order_u = 4
-spl.use_endpoint_u = True
-cable = link(bpy.data.objects.new("Cable", cu))
-braid = principled("Braid", (0.82, 0.8, 0.76), rough=0.75, sheen=0.3)
-add_bump(braid, scale=2400.0, strength=0.25, kind="voronoi")
-cable.data.materials.append(braid)
-plug = rounded_box("Plug", (port.x, port.y - 0.012, PH_AT.z), (0.0085, 0.022, 0.0065), principled("PlugWhite", (0.86, 0.85, 0.82), 0.35), 0.0025)
-plug.rotation_euler = (0, 0, PH_YAW)
+# ---------------------------------------------------------------------------------------------- the charger
+# A woven USB-C cable, actually plugged in. Every position comes from the phone model itself (iphone17pro: the port is
+# the centre of the bottom edge, at z_mid), never from hand-typed world offsets. The plug is parented to the phone, so it
+# rattles with it; the cable leaves the plug through its boot, droops onto the walnut, loops in front of the phone, runs
+# up its right side (clear of the books by 2 cm), drapes over the back edge and hangs down to a 20 W adapter in the
+# outlet behind the nightstand.
+MM = 0.001
+CAB_R = 1.85 * MM                                            # a 3.7 mm woven cable
+CAB_SEGS = 20
+PORT_LOCAL = mathutils.Vector((0.0, -ip.H / 2, 0.5 * MM))    # USB-C port centre, phone-local (z_mid in iphone17pro)
+PLUG_ROT = (math.radians(90), 0.0, 0.0)                      # plug +z (outward) -> phone -y (out of the bottom edge)
+plastic = principled("PlugWhite", (0.86, 0.85, 0.82), 0.3, coat=0.25, coat_rough=0.1)
+steel = principled("PlugSteel", (0.6, 0.6, 0.58), rough=0.3, metal=1.0)
+
+
+def usb_c_plug(name, parent, at, rot):
+    """A USB-C plug built along local +z from the port face (z = 0): the steel shell that sits inside the port (and shows
+    in the 0.45 mm gap), the 11 x 6 x 17 mm white housing with rounded ends, the boot the cable leaves from.
+    Returns (root, local z where the cable starts, inside the boot)."""
+    root = link(bpy.data.objects.new(name, None))
+    root.parent = parent
+    root.location = at
+    root.rotation_euler = rot
+    sh = ip.stadium(8.25 * MM, 2.4 * MM)
+    ip.sweep(f"{name}_shell", [(sh, -6.6 * MM), (sh, 0.6 * MM)], root, steel, cap_first=True, cap_last=True)
+    w, h, r, z0, ln, rf, rb = 11.0 * MM, 6.0 * MM, 2.0 * MM, 0.45 * MM, 17.0 * MM, 0.5 * MM, 1.0 * MM
+    prof = ip.arc(6, lambda p: (rf * (1 - math.sin(p)), z0 + rf * (1 - math.cos(p))))
+    prof += ip.arc(8, lambda p: (rb * (1 - math.cos(p)), z0 + ln - rb + rb * math.sin(p)))
+    ip.sweep(f"{name}_housing", [(ip.inset(w, h, r, r, d), z) for (d, z) in prof], root, plastic, cap_first=True, cap_last=True)
+    zb = z0 + ln
+    ip.revolve(f"{name}_boot", [(2.05 * MM, zb - 0.3 * MM), (2.05 * MM, zb + 1.2 * MM), (1.99 * MM, zb + 2.6 * MM),
+                                 (1.93 * MM, zb + 3.2 * MM)], root, plastic, segs=48, cap_first=True, cap_last=True)
+    return root, zb + 1.0 * MM
+
+
+def braid_material():
+    """Woven sleeve from the tube UVs (u = arc length in metres, v = around): two families of helical strands, 8 each
+    way at a 1.1 mm pitch, interlaced over-under; a little darker in the grooves."""
+    m = bpy.data.materials.new("Braid")
+    m.use_nodes = True
+    nt = m.node_tree
+    p = nt.nodes["Principled BSDF"]
+
+    def op(kind, a, b=None):
+        n = nt.nodes.new("ShaderNodeMath")
+        n.operation = kind
+        for k, v in enumerate((a, b)):
+            if v is None:
+                continue
+            if isinstance(v, (int, float)):
+                n.inputs[k].default_value = v
+            else:
+                nt.links.new(v, n.inputs[k])
+        return n.outputs[0]
+
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(uv.outputs["UV"], sep.inputs[0])
+    a = op("MULTIPLY", sep.outputs["X"], 1 / 0.0011)
+    b = op("MULTIPLY", sep.outputs["Y"], 8.0)
+    s1, s2 = op("ADD", a, b), op("SUBTRACT", a, b)
+    r1 = op("SINE", op("MULTIPLY", op("FRACT", s1), math.pi))
+    r2 = op("SINE", op("MULTIPLY", op("FRACT", s2), math.pi))
+    over = op("MULTIPLY", op("FRACT", op("MULTIPLY", op("ADD", op("FLOOR", s1), op("FLOOR", s2)), 0.5)), 2.0)
+    hgt = op("ADD", r2, op("MULTIPLY", over, op("SUBTRACT", r1, r2)))
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (0.6, 0.59, 0.56, 1)
+    ramp.color_ramp.elements[1].color = (0.85, 0.84, 0.81, 1)
+    nt.links.new(hgt, ramp.inputs[0])
+    nt.links.new(ramp.outputs[0], p.inputs["Base Color"])
+    bp = nt.nodes.new("ShaderNodeBump")
+    bp.inputs["Strength"].default_value = 0.7
+    bp.inputs["Distance"].default_value = 0.0003
+    nt.links.new(hgt, bp.inputs["Height"])
+    nt.links.new(bp.outputs["Normal"], p.inputs["Normal"])
+    p.inputs["Roughness"].default_value = 0.62
+    p.inputs["Sheen Weight"].default_value = 0.35
+    p.inputs["Sheen Roughness"].default_value = 0.35
+    return m
+
+
+def catmull(points, per=24):
+    """Centripetal Catmull-Rom through the points (no overshoot at tight bends), densely sampled."""
+    P = [np.array(v, dtype=float) for v in points]
+    P = [2 * P[0] - P[1]] + P + [2 * P[-1] - P[-2]]
+    out = []
+    for i in range(1, len(P) - 2):
+        p0, p1, p2, p3 = P[i - 1], P[i], P[i + 1], P[i + 2]
+        t1 = np.linalg.norm(p1 - p0) ** 0.5 + 1e-9
+        t2 = t1 + np.linalg.norm(p2 - p1) ** 0.5 + 1e-9
+        t3 = t2 + np.linalg.norm(p3 - p2) ** 0.5 + 1e-9
+        for t in np.linspace(t1, t2, per, endpoint=False):
+            a1 = (t1 - t) / t1 * p0 + t / t1 * p1
+            a2 = (t2 - t) / (t2 - t1) * p1 + (t - t1) / (t2 - t1) * p2
+            a3 = (t3 - t) / (t3 - t2) * p2 + (t - t2) / (t3 - t2) * p3
+            b1 = (t2 - t) / t2 * a1 + t / t2 * a2
+            b2 = (t3 - t) / (t3 - t1) * a2 + (t - t1) / (t3 - t1) * a3
+            out.append((t2 - t) / (t2 - t1) * b1 + (t - t1) / (t2 - t1) * b2)
+    out.append(P[-2])
+    return np.array(out)
+
+
+def resample(path, step):
+    seg = np.linalg.norm(np.diff(path, axis=0), axis=1)
+    s = np.concatenate([[0.0], np.cumsum(seg)])
+    u = np.arange(0.0, s[-1], step)
+    u = np.append(u, s[-1]) if s[-1] - u[-1] > 1e-6 else u
+    return np.stack([np.interp(u, s, path[:, k]) for k in range(3)], axis=1), u
+
+
+def tube(name, path, s, radius, mat, segs=CAB_SEGS):
+    """A tube along the path with parallel-transport frames (no twist); UVs u = arc length (m), v = around (0..1)."""
+    T = np.gradient(path, axis=0)
+    T /= np.linalg.norm(T, axis=1)[:, None]
+    n = np.cross(T[0], (0.0, 0.0, 1.0))
+    n = n / np.linalg.norm(n) if np.linalg.norm(n) > 1e-6 else np.array((1.0, 0.0, 0.0))
+    bm = bmesh.new()
+    rings = []
+    ang = np.linspace(0, 2 * math.pi, segs, endpoint=False)
+    for i in range(len(path)):
+        n = n - np.dot(n, T[i]) * T[i]
+        n /= np.linalg.norm(n)
+        bvec = np.cross(T[i], n)
+        rings.append([bm.verts.new(tuple(path[i] + radius * (math.cos(a) * n + math.sin(a) * bvec))) for a in ang])
+    uvl = bm.loops.layers.uv.new("UVMap")
+    for i in range(len(rings) - 1):
+        for j in range(segs):
+            j2 = (j + 1) % segs
+            f = bm.faces.new((rings[i][j], rings[i][j2], rings[i + 1][j2], rings[i + 1][j]))
+            f.smooth = True
+            for loop, (si, vj) in zip(f.loops, ((s[i], j), (s[i], j + 1), (s[i + 1], j + 1), (s[i + 1], j))):
+                loop[uvl].uv = (si, vj / segs)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = link(bpy.data.objects.new(name, me))
+    me.materials.append(mat)
+    return ob
+
+
+# the plug, in the port
+plug, z_cab = usb_c_plug("Plug", PHONE, PORT_LOCAL, PLUG_ROT)
+M_PLUG = (mathutils.Matrix.Translation(PH_AT) @ mathutils.Matrix.Rotation(PH_YAW, 4, "Z")
+          @ mathutils.Matrix.Translation(PORT_LOCAL) @ mathutils.Euler(PLUG_ROT).to_matrix().to_4x4())
+CS = M_PLUG @ mathutils.Vector((0.0, 0.0, z_cab))                          # the cable starts inside the boot
+CD = (M_PLUG.to_3x3() @ mathutils.Vector((0.0, 0.0, 1.0))).normalized()    # ... heading out of the plug
+# behind the nightstand (never in shot, but the cable goes somewhere real): a duplex outlet and a 20 W adapter in it
+WALL_Y, PLATE_D, AD_D, AD_Z = 0.33, 0.0055, 0.028, 0.3795
+rounded_box("OutletPlate", (0.02, WALL_Y - PLATE_D / 2, 0.36), (0.07, PLATE_D, 0.115),
+            principled("OutletWhite", (0.8, 0.79, 0.76), 0.35), 0.0015, 3)
+rounded_box("Adapter", (0.02, WALL_Y - PLATE_D - AD_D / 2, AD_Z), (0.045, AD_D, 0.045), plastic, 0.006, 6)
+ad_at = mathutils.Vector((0.02, WALL_Y - PLATE_D - AD_D, AD_Z))
+usb_c_plug("AdapterPlug", None, ad_at, PLUG_ROT)
+CE = ad_at + mathutils.Vector((0.0, -z_cab, 0.0))                         # the cable ends inside that plug boot
+
+# the route. On the walnut the cable rests on the top (centre at TOP_Z + radius, a hair into the varnish for contact);
+# over the back edge it follows the 6 mm bevel; behind the nightstand it hangs in a U up into the adapter plug.
+# The books and the earbuds case are where they render (measured), not at their nominal centres: rounded_box bakes
+# the location into the mesh, so rotating its result swings it around the world origin.
+rest = TOP_Z + CAB_R - 0.05 * MM
+
+
+def along(k, dz=0.0, dx=0.0):
+    v = CS + CD * k
+    return (v.x + dx, v.y, v.z + dz)
+
+
+route = [tuple(CS), along(0.005), along(0.014, -0.4 * MM), along(0.024, -1.6 * MM, 0.0015), along(0.034, rest - CS.z + 0.2 * MM, 0.004)]
+route += [(x, y, rest) for (x, y) in [(-0.0270, -0.1735), (-0.0110, -0.1815), (0.0090, -0.1830), (0.0290, -0.1760),
+                                       (0.0445, -0.1600), (0.0528, -0.1360), (0.0545, -0.1020), (0.0522, -0.0620),
+                                       (0.0492, -0.0220), (0.0470, 0.0180), (0.0442, 0.0580), (0.0385, 0.0980),
+                                       (0.0295, 0.1370), (0.0205, 0.1680), (0.0150, 0.1890)]]
+EDGE_Y, EDGE_Z, EDGE_R = 0.20 - 0.006, TOP_Z - 0.006, 0.006 + CAB_R - 0.05 * MM
+route += [(0.0140 - 0.0015 * k / 6, EDGE_Y + EDGE_R * math.sin(math.radians(15 * k)), EDGE_Z + EDGE_R * math.cos(math.radians(15 * k)))
+          for k in range(7)]
+route += [(0.0125, EDGE_Y + EDGE_R, 0.580), (0.0128, 0.2020, 0.540), (0.0132, 0.2023, 0.480), (0.0137, 0.2028, 0.420),
+          (0.0143, 0.2040, 0.370), (0.0150, 0.2075, 0.335), (0.0160, 0.2150, 0.312), (0.0170, 0.2270, 0.302),
+          (0.0180, 0.2390, 0.308), (0.0188, 0.2480, 0.325), (0.0194, 0.2540, 0.345), (0.0198, 0.2585, 0.362),
+          (0.0200, 0.2640, 0.3740), (0.0200, CE.y - 0.007, CE.z - 0.0005), (0.0200, CE.y - 0.0035, CE.z), tuple(CE)]
+CAB_PATH, CAB_S = resample(catmull(route), 0.001)
+# keep it out of the wood: on the top, the centre never sinks below rest; around the back edge, never inside the bevel
+for i, (x, y, z) in enumerate(CAB_PATH):
+    if abs(x) < 0.26 and -0.194 <= y <= EDGE_Y and z < rest:
+        CAB_PATH[i, 2] = rest
+    if y > EDGE_Y and z > EDGE_Z:
+        d = math.hypot(y - EDGE_Y, z - EDGE_Z)
+        if d < EDGE_R:
+            CAB_PATH[i, 1] = EDGE_Y + (y - EDGE_Y) * EDGE_R / d
+            CAB_PATH[i, 2] = EDGE_Z + (z - EDGE_Z) * EDGE_R / d
+cable = tube("Cable", CAB_PATH, CAB_S, CAB_R, braid_material())
+CAB_REST = np.array([v.co[:] for v in cable.data.vertices])
+# the first few centimetres follow the phone when it rattles (the plug is rigid in the port), fading out on the walnut
+CAB_W = np.repeat(1 - np.array([smooth((s - 0.006) / 0.045) for s in CAB_S]), CAB_SEGS)[:, None]
+CAB_STATE = [None]
+
+
+def cable_follow(dx, dy, dr):
+    if CAB_STATE[0] == (dx, dy, dr):
+        return
+    CAB_STATE[0] = (dx, dy, dr)
+    c, s_ = math.cos(dr), math.sin(dr)
+    q = CAB_REST - np.array(PH_AT)
+    moved = np.stack([c * q[:, 0] - s_ * q[:, 1] + PH_AT.x + dx, s_ * q[:, 0] + c * q[:, 1] + PH_AT.y + dy, CAB_REST[:, 2]], axis=1)
+    v = CAB_REST + CAB_W * (moved - CAB_REST)
+    cable.data.vertices.foreach_set("co", v.astype(np.float32).ravel())
+    cable.data.update()
+
+
 # a tumbler of water: glass shell + water with a meniscus-ish top
 glass = principled("Glass", (1, 1, 1), rough=0.0, transmission=1.0, ior=1.5)
 water = principled("Water", (0.9, 0.96, 1.0), rough=0.0, transmission=1.0, ior=1.333)
@@ -405,6 +596,7 @@ def apply(t):
             jr += 0.35 * k * math.sin(u * 2 * math.pi * 41 + 0.5)
     PHONE.location = (PH_AT.x + jx, PH_AT.y + jy, PH_AT.z)
     PHONE.rotation_euler = (0, 0, PH_YAW + math.radians(jr))
+    cable_follow(jx, jy, math.radians(jr))                  # the plug rides along (parented); the cable near it follows
 
 
 def on_frame(sc, depsgraph=None):
