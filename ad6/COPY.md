@@ -55,10 +55,13 @@ Learn More
 
 `https://spamclaims.com/lp/quick?vv=reel-storytime&utm_source=instagram&utm_medium=paid_social&utm_campaign=reel_quick&utm_content=reel-storytime`
 
-`/lp/quick` is the quick funnel built for this ad: one tap per card, no dropdowns, the screenshots and three fields.
-- It opens on the same headline as the ad's end card.
-- It goes live after Publish -> Update in Lovable (spamclaims main `833ca68`).
-- Until then, use `/lp/money`.
+**Since Oct 13, 2026 this link opens the regular homepage**, the same page partner links like `/aiden` show (spamclaims main `2e015d1`, Moe's call).
+- Its sessions count as landing page `classic` in Admin -> Landing pages, with video `reel-storytime`.
+- Claims from it are labeled "Instagram".
+- The ad's last beat still shows the quick funnel's screens, so the video and the page no longer match exactly.
+- To bring the quick funnel back, set `LP_QUICK_PAGE` to "quick" in spamclaims `src/config/home.ts`, then Publish in Lovable.
+
+The quick funnel (Oct 11-13) was one tap per card, with no dropdowns, then the screenshots and three fields. It opened on the same headline as the ad's end card.
 
 ## Audience
 
